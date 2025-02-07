@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flasgger import Swagger
 from ds import ds_ops
 from auth import user_auth
 import jwt
@@ -14,12 +15,61 @@ else:
     
 app = Flask(__name__)
 
+# Swagger Configuration
+swagger = Swagger(app, template={
+    "swagger": "2.0",
+    "info": {
+        "title": "Flask JWT API",
+        "description": "Simple API with JWT Authentication and Swagger UI",
+        "version": "1.0.0"
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
+        }
+    }
+})
+
+# # Initialize Swagger
+# swagger = Swagger(app)
+
 @app.route('/')
 def main():
     return 'Europe Immigration/Emigration Analysis'
 
 @app.route('/login', methods=['POST'])
 def login():
+    
+    """
+    User Login
+    ---
+    tags:
+      - User Authentication
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            username:
+              type: string
+              example: user
+            password:
+              type: string
+              example: password
+    responses:
+      200:
+        description: JWT Token returned
+        schema:
+          type: object
+          properties:
+            token:
+              type: string
+    """
 
     username = request.json.get('username')
     password = request.json.get('password')
@@ -30,9 +80,42 @@ def login():
     
     return jsonify({'token': token}), 200
         
-
+# TODO: Control country and year filters
 @app.route('/migration_data', methods=['GET'])
 def get_migration_data():
+    
+    """
+    Migration Data
+    ---
+    tags:
+      - Protected Endpoint
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Successful access
+        schema:
+          type: object
+          properties:
+            Country:
+              type: string
+              example: Country code
+            Im_Value:
+              type: number
+              example: 100000
+            Em_Value:
+                type: number
+                example: 100000
+            Net_Migration:
+                type: number
+                example: 100000
+            Year:
+                type: number
+                example: 2011
+
+      401:
+        description: Unauthorized access
+    """
     
     token = request.headers.get('Authorization')
 

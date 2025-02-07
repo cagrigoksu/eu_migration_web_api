@@ -2,6 +2,7 @@ import jwt
 import datetime
 import os
 
+# FIXME: Fix environment variable
 # Set up the JWT
 SECRET_KEY = "1234567890poiuytrewq"#os.getenv('SECRET_KEY')
 
