@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, request
 from flasgger import Swagger
 from ds import ds_ops
-from auth import user_auth
+from routes.auth import user_auth
 import jwt
+
+from routes.auth.user_auth import auth_bp 
 
 # Fetch the dataframe from ds_ops
 is_file_exist = ds_ops.check_file_exist()
@@ -14,6 +16,9 @@ else:
     df_eu = ds_ops.get_dataframe()   
     
 app = Flask(__name__)
+
+# Register Blueprints
+app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
 # Swagger Configuration
 swagger = Swagger(app, template={
@@ -40,45 +45,6 @@ swagger = Swagger(app, template={
 def main():
     return 'Europe Immigration/Emigration Analysis'
 
-@app.route('/login', methods=['POST'])
-def login():
-    
-    """
-    User Login
-    ---
-    tags:
-      - User Authentication
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            username:
-              type: string
-              example: user
-            password:
-              type: string
-              example: password
-    responses:
-      200:
-        description: JWT Token returned
-        schema:
-          type: object
-          properties:
-            token:
-              type: string
-    """
-
-    username = request.json.get('username')
-    password = request.json.get('password')
-
-    token = user_auth.login(username, password)
-    
-    print(token)
-    
-    return jsonify({'token': token}), 200
         
 # TODO: Control country and year filters
 @app.route('/migration_data', methods=['GET'])
