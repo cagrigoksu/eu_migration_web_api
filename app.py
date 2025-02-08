@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # Register Blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
-app.register_blueprint(migration_bp, url_prefix='/api/migration_data')
+app.register_blueprint(migration_bp, url_prefix='/api/migration')
 
 # Swagger Configuration
 swagger = Swagger(app, template={
