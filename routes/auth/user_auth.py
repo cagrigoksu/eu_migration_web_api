@@ -1,31 +1,94 @@
 from flask import Blueprint, request, jsonify
-import jwt
-import datetime
-import os
+import sqlite3
+from datetime import datetime, timedelta
+import uuid
+from pysqlcipher3 import dbapi2 as sqlite
+
+#FIXME: db encryption doesn't work properly.
+ENCRYPTION_KEY = 'secret-key'
 
 auth_bp = Blueprint('auth', __name__)
 
-# FIXME: Fix environment variable
-# Set up the JWT
-SECRET_KEY = "1234567890poiuytrewq"#os.getenv('SECRET_KEY')
-
-def user_login(username, password):
-
-    if username == 'user' and password == 'password':
-        
-        # Create a JWT token 
-        token = jwt.encode({
-            'username': username,
-            'exp': datetime.datetime.now() + datetime.timedelta(hours=1)
-        }, SECRET_KEY, algorithm='HS256')
-
-        return token
-    else:
-        return None
+# Database setup
+def init_db():
+    conn = sqlite3.connect('apikeys.db')
+    cursor = conn.cursor()
     
-def decode_token(token):
-    decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-    return decoded_token
+    cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS api_keys (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            key TEXT UNIQUE NOT NULL,
+            issue_date TEXT NOT NULL,
+            user_email TEXT UNIQUE NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+    
+# create a new API key
+def create_api_key(user_email):
+    new_key = str(uuid.uuid4())
+    issue_date = datetime.now().strftime('%Y-%m-%d')
+
+    conn = sqlite3.connect('apikeys.db')
+    cursor = conn.cursor()
+    
+    cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
+    
+    cursor.execute('INSERT INTO api_keys (key, issue_date, user_email) VALUES (?, ?, ?)', (new_key, issue_date, user_email))
+    conn.commit()
+    conn.close()
+
+    return new_key
+
+# validate API key
+def is_valid_api_key(api_key):
+    conn = sqlite3.connect('apikeys.db')
+    cursor = conn.cursor()
+    
+    cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
+    
+    cursor.execute("SELECT issue_date FROM api_keys WHERE key = ?", (api_key,))
+    result = cursor.fetchone()
+    conn.close()
+
+    if result:
+        issue_date = datetime.strptime(result[0], '%Y-%m-%d')
+        if datetime.now() - issue_date < timedelta(days=30):
+            return True
+    return False
+
+# handle expired API key
+def handle_expired_api_key(api_key):
+    conn = sqlite3.connect('apikeys.db')
+    cursor = conn.cursor()
+    
+    cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
+    
+    cursor.execute("SELECT user_email FROM api_keys WHERE key = ?", (api_key,))
+    user = cursor.fetchone()
+    cursor.execute("DELETE FROM api_keys WHERE key = ?", (api_key,))
+    conn.commit()
+    conn.close()
+
+    if user:
+        new_api_key = create_api_key(user[0])
+        return jsonify({"error": "API key expired. A new API key has been issued.", "new_api_key": new_api_key}), 403
+    
+    return jsonify({"error": "Invalid API key"}), 403
+
+# decorator to require API key authentication
+def require_api_key(view_function):
+    def decorated_function(*args, **kwargs):
+        api_key = request.headers.get('X-API-KEY')
+        if not api_key:
+            return jsonify({"error": "API key missing"}), 401
+        if not is_valid_api_key(api_key):
+            return handle_expired_api_key(api_key)
+        return view_function(*args, **kwargs)
+    return decorated_function
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -42,7 +105,7 @@ def login():
         schema:
           type: object
           properties:
-            username:
+            user_email:
               type: string
               example: user
             password:
@@ -50,20 +113,22 @@ def login():
               example: password
     responses:
       200:
-        description: JWT Token returned
+        description: API-Key returned
         schema:
           type: object
           properties:
-            token:
+            api_key:
               type: string
     """
 
-    username = request.json.get('username')
+    user_email = request.json.get('user_email')
     password = request.json.get('password')
 
-    token = user_login(username, password)
-    
-    print(token)
-    
-    return jsonify({'token': token}), 200
+    if user_email == 'user' and password == 'password':
+        api_key = create_api_key(user_email)
+        return jsonify({'api_key': api_key, 'message': 'Login successful'}), 200
+    else:
+        return jsonify({'error': 'Invalid credentials'}), 401
+
+init_db()
 

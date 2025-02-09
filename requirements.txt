@@ -5,3 +5,5 @@ numpy==1.21.2
 requests==2.26.0  # added requests for HTTP requests
 PyJWT==2.8.0  # added PyJWT for JWT authentication
 Flasgger
+pysqlcipher3
+

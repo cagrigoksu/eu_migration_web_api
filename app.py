@@ -1,7 +1,6 @@
 from flask import Flask
 from flasgger import Swagger
 
-
 from routes.auth.user_auth import auth_bp 
 from routes.data.migration import migration_bp
 
@@ -16,18 +15,23 @@ app.register_blueprint(migration_bp, url_prefix='/api/migration')
 swagger = Swagger(app, template={
     "swagger": "2.0",
     "info": {
-        "title": "Flask JWT API",
-        "description": "Simple API with JWT Authentication and Swagger UI",
+        "title": "Flask API",
+        "description": "Simple API with ApiKeyAuth Authentication and Swagger UI",
         "version": "1.0.0"
     },
     "securityDefinitions": {
-        "Bearer": {
+        "ApiKeyAuth": {
             "type": "apiKey",
-            "name": "Authorization",
+            "name": "X-API-KEY",
             "in": "header",
-            "description": "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
+            "description": "API Key Authentication. Provide the key in the 'X-API-KEY' header."
         }
-    }
+    },
+    "security": [
+        {
+            "ApiKeyAuth": []
+        }
+        ]
 })
 
 # # Initialize Swagger
