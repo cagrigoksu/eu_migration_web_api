@@ -1,20 +1,20 @@
 from flask import Blueprint, request, jsonify
-import sqlite3
+#import sqlite3
 from datetime import datetime, timedelta
 import uuid
 from pysqlcipher3 import dbapi2 as sqlite
 
-#FIXME: db encryption doesn't work properly.
+#TODO: change it to environment variable.
 ENCRYPTION_KEY = 'secret-key'
 
 auth_bp = Blueprint('auth', __name__)
 
 # Database setup
 def init_db():
-    conn = sqlite3.connect('apikeys.db')
+    conn = sqlite.connect('apikeys.db')
     cursor = conn.cursor()
     
-    cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
+    cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")    
     
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS api_keys (
@@ -32,7 +32,7 @@ def create_api_key(user_email):
     new_key = str(uuid.uuid4())
     issue_date = datetime.now().strftime('%Y-%m-%d')
 
-    conn = sqlite3.connect('apikeys.db')
+    conn = sqlite.connect('apikeys.db')
     cursor = conn.cursor()
     
     cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
@@ -45,7 +45,7 @@ def create_api_key(user_email):
 
 # validate API key
 def is_valid_api_key(api_key):
-    conn = sqlite3.connect('apikeys.db')
+    conn = sqlite.connect('apikeys.db')
     cursor = conn.cursor()
     
     cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
@@ -62,7 +62,7 @@ def is_valid_api_key(api_key):
 
 # handle expired API key
 def handle_expired_api_key(api_key):
-    conn = sqlite3.connect('apikeys.db')
+    conn = sqlite.connect('apikeys.db')
     cursor = conn.cursor()
     
     cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
