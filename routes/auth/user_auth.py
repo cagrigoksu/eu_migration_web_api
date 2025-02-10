@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime, timedelta
 import uuid
 from pysqlcipher3 import dbapi2 as sqlite
+import os
 
 #TODO: change it to environment variable.
 ENCRYPTION_KEY = 'secret-key'
@@ -11,20 +12,23 @@ auth_bp = Blueprint('auth', __name__)
 
 # Database setup
 def init_db():
-    conn = sqlite.connect('apikeys.db')
+    db_path = 'apikeys.db'
+    first_time_setup = not os.path.exists(db_path)
+
+    conn = sqlite.connect(db_path)
     cursor = conn.cursor()
-    
     cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")    
     
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS api_keys (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            key TEXT UNIQUE NOT NULL,
-            issue_date TEXT NOT NULL,
-            user_email TEXT UNIQUE NOT NULL
-        )
-    ''')
-    conn.commit()
+    if first_time_setup:
+      cursor.execute('''
+          CREATE TABLE IF NOT EXISTS api_keys (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              key TEXT UNIQUE NOT NULL,
+              issue_date TEXT NOT NULL,
+              user_email TEXT UNIQUE NOT NULL
+          )
+      ''')
+      conn.commit()
     conn.close()
     
 # create a new API key
@@ -33,8 +37,7 @@ def create_api_key(user_email):
     issue_date = datetime.now().strftime('%Y-%m-%d')
 
     conn = sqlite.connect('apikeys.db')
-    cursor = conn.cursor()
-    
+    cursor = conn.cursor()    
     cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
     
     cursor.execute('INSERT INTO api_keys (key, issue_date, user_email) VALUES (?, ?, ?)', (new_key, issue_date, user_email))
@@ -46,8 +49,7 @@ def create_api_key(user_email):
 # validate API key
 def is_valid_api_key(api_key):
     conn = sqlite.connect('apikeys.db')
-    cursor = conn.cursor()
-    
+    cursor = conn.cursor()    
     cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
     
     cursor.execute("SELECT issue_date FROM api_keys WHERE key = ?", (api_key,))
@@ -63,8 +65,7 @@ def is_valid_api_key(api_key):
 # handle expired API key
 def handle_expired_api_key(api_key):
     conn = sqlite.connect('apikeys.db')
-    cursor = conn.cursor()
-    
+    cursor = conn.cursor()    
     cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
     
     cursor.execute("SELECT user_email FROM api_keys WHERE key = ?", (api_key,))

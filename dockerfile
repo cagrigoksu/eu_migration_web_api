@@ -1,18 +1,37 @@
-# Web_API
-# Use an official Python runtime as a parent image
-FROM python:3.9
+FROM python:3.12-slim
 
-# Set the working directory in the container
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    make \
+    libssl-dev \
+    libffi-dev \
+    libsqlite3-dev \
+    python3-dev \
+    sqlcipher \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
+# Copy project files to the container
 COPY . /app
 
-# Install any needed dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Add SQLCipher dependencies before pip install
+RUN apt-get update && apt-get install -y \
+    libsqlcipher-dev \
+    gcc \
+    python3-dev \
+    build-essential \
+    && pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apt-get remove --purge -y gcc python3-dev build-essential \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Expose port 8080
+# Expose the port the app runs on
 EXPOSE 8080
 
-# Run the application
+# Command to run the Flask application
 CMD ["python", "app.py"]

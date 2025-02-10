@@ -1,9 +1,32 @@
-Flask==2.0.1
-Werkzeug==2.0.1  # needed for Docker
-pandas==1.3.3
-numpy==1.21.2
-requests==2.26.0  # added requests for HTTP requests
-PyJWT==2.8.0  # added PyJWT for JWT authentication
-Flasgger
-pysqlcipher3
-
+attrs==25.1.0
+blinker==1.9.0
+certifi==2025.1.31
+cffi==1.17.1
+charset-normalizer==3.4.1
+click==8.1.8
+cryptography==44.0.0
+flasgger==0.9.7.1
+Flask==3.1.0
+idna==3.10
+itsdangerous==2.2.0
+Jinja2==3.1.5
+jsonschema==4.23.0
+jsonschema-specifications==2024.10.1
+MarkupSafe==3.0.2
+mistune==3.1.1
+numpy==2.2.2
+packaging==24.2
+pandas==2.2.3
+pycparser==2.22
+pysqlcipher3==1.2.0
+python-dateutil==2.9.0.post0
+pytz==2025.1
+PyYAML==6.0.2
+referencing==0.36.2
+requests==2.32.3
+rpds-py==0.22.3
+six==1.17.0
+typing_extensions==4.12.2
+tzdata==2025.1
+urllib3==2.3.0
+Werkzeug==3.1.3
