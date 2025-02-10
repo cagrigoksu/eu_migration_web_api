@@ -137,3 +137,60 @@ def dashboard():
         stacked_chart=stacked_chart,
         bubble_chart=bubble_chart
     )
+    
+@analytics_bp.route("/map", methods=["GET"], endpoint="map")
+@swag_from({
+    'tags': ['Data Visualization - Protected Endpoint']
+})
+def map():
+
+    df = df_eu
+
+    fig_map = px.choropleth(
+        df,
+        locations='Country',
+        locationmode='ISO-3',
+        color='Net_Migration',
+        hover_name='Country',
+        animation_frame='Year',
+        title='Choropleth Map of Net Migration by Country'
+    )
+    map_chart = fig_map.to_html(full_html=False)
+
+    html_template = """
+<html>
+    <head>
+        <title>EU Migration Dashboard</title>
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                width: 100%;
+            }
+            .chart-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                width: 100%;
+            }
+            .map-box {
+                height: 100%;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="chart-container">
+            <div class="map-box">{{ map_chart|safe }}</div>
+        </div>
+    </body>
+</html>
+    """
+
+    return render_template_string(
+        html_template,
+        map_chart = map_chart
+    )
