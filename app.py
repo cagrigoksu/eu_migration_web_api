@@ -3,7 +3,7 @@ from flasgger import Swagger
 
 from routes.auth.user_auth import auth_bp 
 from routes.data.migration import migration_bp
-from routes.data.analytics import analytics_bp
+from routes.analytics.analytics import analytics_bp
    
 app = Flask(__name__)
 
