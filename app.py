@@ -3,13 +3,14 @@ from flasgger import Swagger
 
 from routes.auth.user_auth import auth_bp 
 from routes.data.migration import migration_bp
-
+from routes.data.analytics import analytics_bp
    
 app = Flask(__name__)
 
 # Register Blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(migration_bp, url_prefix='/api/migration')
+app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
 
 # Swagger Configuration
 swagger = Swagger(app, template={
