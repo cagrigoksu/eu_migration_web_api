@@ -17,9 +17,8 @@ df_eu = ds_ops.get_dataframe()
     'tags': ['Data Visualization - Protected Endpoint']
 })
 def dashboard():
-    
-    # Handle missing data
-    df = df_eu.dropna(subset=['Country', 'Year', 'Im_Value', 'Em_Value', 'Net_Migration'])
+
+    df = df_eu
 
      # Net Migration Trends (line chart) 
     fig_line = px.line(
@@ -30,18 +29,46 @@ def dashboard():
         title='Net Migration Trends by Country'
     )
     line_chart = fig_line.to_html(full_html=False)
+    
+    # Immigration vs Emigration (bar chart) 
+    fig_bar = go.Figure()
+    fig_bar.add_trace(go.Bar(x=df['Year'], y=df['Im_Value'], name='Immigration'))
+    fig_bar.add_trace(go.Bar(x=df['Year'], y=df['Em_Value'], name='Emigration'))
+    fig_bar.update_layout(barmode='group', title='Immigration vs Emigration')
+    bar_chart = fig_bar.to_html(full_html=False)
 
     html_template = """
     <html>
     <head>
         <title>EU Migration Dashboard</title>
+        <style>
+            .chart-container {
+                display: flex;
+                justify-content: space-around;
+                flex-wrap: wrap;
+            }
+            .chart-box {
+                width: 48%;
+                margin: 1%;
+                 min-height: 520px;
+            }
+        </style>
     </head>
     <body>
         <h1 style='text-align:center;'>EU Migration Data Dashboard</h1>
 
-        <!-- Net Migration Trends Chart -->
-        <h2>Net Migration Trends</h2>
-        <div>{{ line_chart|safe }}</div>
+        <div class="chart-container">
+        
+            <div class="chart-box">
+                <h2>Net Migration Trends</h2>
+                <div>{{ line_chart|safe }}</div>
+            </div>
+
+            <div class="chart-box">
+                <h2>Immigration vs Emigration</h2>
+                <div>{{ bar_chart|safe }}</div>
+            </div>
+        </div>
 
     </body>
     </html>
@@ -49,5 +76,6 @@ def dashboard():
 
     return render_template_string(
         html_template,
-        line_chart=line_chart
+        line_chart=line_chart,
+        bar_chart=bar_chart,
     )
