@@ -54,6 +54,19 @@ def dashboard():
     fig_stacked.update_layout(barmode='stack', title='Stacked Immigration & Emigration Trends')
     stacked_chart = fig_stacked.to_html(full_html=False)
 
+    # Bubble Chart for Net Migration
+    df['Total_Migration'] = df['Im_Value'] + df['Em_Value']
+    fig_bubble = px.scatter(
+        df,
+        x='Year',
+        y='Net_Migration',
+        size='Total_Migration',
+        color='Country',
+        title='Net Migration with Bubble Size Based on Total Migration',
+        size_max=60
+    )
+    bubble_chart = fig_bubble.to_html(full_html=False)
+
     html_template = """
     <html>
     <head>
@@ -100,6 +113,16 @@ def dashboard():
                     <div>{{ stacked_chart|safe }}</div>
                 </div>
             </div>
+            
+            <div class="chart-container">
+            
+                <div class="chart-box">
+                    <h2>Net Migration with Bubble Size Based on Total Migration</h2>
+                    <div>{{ bubble_chart|safe }}</div>
+                </div>
+                
+            </div>
+            
         </div>
 
     </body>
@@ -111,5 +134,6 @@ def dashboard():
         line_chart=line_chart,
         bar_chart=bar_chart,
         pie_chart=pie_chart,
-        stacked_chart=stacked_chart
+        stacked_chart=stacked_chart,
+        bubble_chart=bubble_chart
     )
