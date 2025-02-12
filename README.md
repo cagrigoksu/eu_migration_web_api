@@ -13,11 +13,9 @@ The Europe Migration Web API is a backend service developed using Flask. It prov
 
 ## Technologies Used
 
-- **Python 3.x**
-- **Flask** (Web Framework)
-- **Pandas** (for Data Manipulation)
-- **JSON** (for Data Serialization)
-- **Docker**  
+- **Python 3.12**
+For necessary libraries, please see requirements.txt.
+
 ## Datasets Used
 
 | Dataset       | Source URL                                                                                     | File Name                   |
@@ -34,7 +32,8 @@ The Europe Migration Web API is a backend service developed using Flask. It prov
 ```
 ### Example Endpoints
 
-- ### Get General Migration Data:
+- ### Check apidocs 
+
 ```sh
-GET /migration_data
+127.0.0.1:8080/apidocs/
 ```
