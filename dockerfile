@@ -6,9 +6,10 @@ RUN apt-get update && apt-get install -y \
     make \
     libssl-dev \
     libffi-dev \
-    libsqlite3-dev \
     python3-dev \
     sqlcipher \
+    libsqlcipher-dev \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory inside the container
@@ -17,14 +18,9 @@ WORKDIR /app
 # Copy project files to the container
 COPY . /app
 
-# Add SQLCipher dependencies before pip install
-RUN apt-get update && apt-get install -y \
-    libsqlcipher-dev \
-    gcc \
-    python3-dev \
-    build-essential \
-    && pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt \
+# Install Python dependencies
+RUN pip install --upgrade pip \
+    && CFLAGS="-I/usr/include -DSQLITE_HAS_CODEC" LDFLAGS="-lcrypto -lsqlcipher" pip install --no-cache-dir -r requirements.txt \
     && apt-get remove --purge -y gcc python3-dev build-essential \
     && apt-get autoremove -y \
     && apt-get clean \

@@ -17,11 +17,11 @@ def init_db():
 
     conn = sqlite.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")    
+    cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")   
     
     if first_time_setup:
       cursor.execute('''
-          CREATE TABLE IF NOT EXISTS api_keys (
+          CREATE TABLE IF NOT EXISTS apikeys (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               key TEXT UNIQUE NOT NULL,
               issue_date TEXT NOT NULL,
@@ -40,7 +40,7 @@ def create_api_key(user_email):
     cursor = conn.cursor()    
     cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
     
-    cursor.execute('INSERT INTO api_keys (key, issue_date, user_email) VALUES (?, ?, ?)', (new_key, issue_date, user_email))
+    cursor.execute('INSERT INTO apikeys (key, issue_date, user_email) VALUES (?, ?, ?)', (new_key, issue_date, user_email))
     conn.commit()
     conn.close()
 
@@ -52,7 +52,7 @@ def is_valid_api_key(api_key):
     cursor = conn.cursor()    
     cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
     
-    cursor.execute("SELECT issue_date FROM api_keys WHERE key = ?", (api_key,))
+    cursor.execute("SELECT issue_date FROM apikeys WHERE key = ?", (api_key,))
     result = cursor.fetchone()
     conn.close()
 
@@ -68,9 +68,9 @@ def handle_expired_api_key(api_key):
     cursor = conn.cursor()    
     cursor.execute(f"PRAGMA key = '{ENCRYPTION_KEY}';")
     
-    cursor.execute("SELECT user_email FROM api_keys WHERE key = ?", (api_key,))
+    cursor.execute("SELECT user_email FROM apikeys WHERE key = ?", (api_key,))
     user = cursor.fetchone()
-    cursor.execute("DELETE FROM api_keys WHERE key = ?", (api_key,))
+    cursor.execute("DELETE FROM apikeys WHERE key = ?", (api_key,))
     conn.commit()
     conn.close()
 
