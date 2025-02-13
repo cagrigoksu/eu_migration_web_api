@@ -14,7 +14,7 @@ The Europe Migration Web API is a backend service developed using Flask. It prov
 ## Technologies Used
 
 - **Python 3.12**
-For necessary libraries, please see requirements.txt.
+For the necessary libraries, please see `requirements.txt`. 
 
 ## Datasets Used
 
@@ -37,3 +37,15 @@ For necessary libraries, please see requirements.txt.
 ```sh
 127.0.0.1:8080/apidocs/
 ```
+
+- ### Data analysis 
+
+```sh
+127.0.0.1:8080/api/analytics/
+```
+
+```sh
+127.0.0.1:8080/api/analytics/map
+```
+
+
