@@ -43,11 +43,11 @@ For this project Eurostat is used to access datasets. All used databases are lis
 - ### Data analysis 
 
 ```sh
-127.0.0.1:8080/api/analytics/
+127.0.0.1:8080/analytics/dashboard
 ```
 
 ```sh
-127.0.0.1:8080/api/analytics/map
+127.0.0.1:8080/analytics/map
 ```
 
 
