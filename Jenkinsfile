@@ -48,10 +48,11 @@ pipeline {
         stage('Merge to Main') {
              steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                    withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD'),
+                                     string(credentialsId: 'git-user-email', variable: 'GIT_EMAIL')]) {
                         sh '''
                         # Set up Git config
-                        git config user.email "cagrigoksu.ustundag@gmail.com"
+                        git config user.email "${GIT_EMAIL}"
                         git config user.name "Jenkins CI"
 
                         git reset --hard
