@@ -1,2 +1,7 @@
 env/
 apikeys.db
+
+__pycache__/
+*.pyc
+
+.vscode/
