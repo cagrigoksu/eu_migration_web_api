@@ -2,61 +2,72 @@ pipeline {
     agent any
 
     environment {
-        SOURCE_BRANCH = "dev"     
-        TARGET_BRANCH = "main"
+        REPO_URL = 'https://github.com/cagrigoksu/eu_migration_web_api.git'
+        DEV_BRANCH = 'dev'
+        MAIN_BRANCH = 'main'
+        VENV_DIR = 'venv'
     }
 
     stages {
         stage('Clone Repository') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-                        sh '''
-                        git clone -b $SOURCE_BRANCH https://$GITHUB_TOKEN@github.com/cagrigoksu/eu_migration_web_api.git repo
-                        cd repo
-                        '''
-                    }
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "*/${DEV_BRANCH}"]],
+                        userRemoteConfigs: [[
+                            url: REPO_URL,
+                            credentialsId: 'github-token' 
+                        ]]
+                    ])
                 }
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Setup Python Environment') {
             steps {
-                sh 'pip install -r repo/requirements.txt'
-            }
-        }
-
-        stage('Linting') {
-            steps {
-                sh 'flake8 repo/app.py'
+                script {
+                    sh '''
+                    python3 -m venv ${VENV_DIR}
+                    source ${VENV_DIR}/bin/activate
+                    pip install -r requirements.txt
+                    '''
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'pytest repo/'
+                script {
+                    sh '''
+                    source ${VENV_DIR}/bin/activate
+                    pytest tests/
+                    '''
+                }
             }
         }
 
-        stage('Merge Dev into Main & Push') {
+        stage('Merge to Main') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-                        sh '''
-                        cd repo
-                        git config --global user.email "cagrigoksu.ustundag@gmail.com"
-                        git config --global user.name "Jenkins"
-
-                        git fetch origin
-                        git checkout -B $TARGET_BRANCH origin/$TARGET_BRANCH
-
-                        git merge origin/$SOURCE_BRANCH --no-edit
-
-                        git push https://$GITHUB_TOKEN@github.com/cagrigoksu/eu_migration_web_api.git $TARGET_BRANCH
-                        '''
-                    }
+                    sh '''
+                    git config user.email "cagrigoksu.ustundag@gmail.com"
+                    git config user.name "Jenkins CI"
+                    git checkout ${MAIN_BRANCH}
+                    git merge ${DEV_BRANCH}
+                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/cagrigoksu/eu_migration_web_api.git ${MAIN_BRANCH}
+                    '''
                 }
             }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Pipeline failed!'
+        }
+        success {
+            echo 'Code successfully merged to main!'
         }
     }
 }
