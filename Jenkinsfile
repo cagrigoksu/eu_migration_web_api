@@ -6,6 +6,8 @@ pipeline {
         DEV_BRANCH = 'dev'
         MAIN_BRANCH = 'main'
         VENV_DIR = 'venv'
+        IMAGE_NAME = 'eu_migration'
+        DOCKER_REGISTRY = 'localhost:5000'  // Local Docker registry (or Docker daemon)
     }
 
     stages {
@@ -46,7 +48,7 @@ pipeline {
         }
 
         stage('Merge to Main') {
-             steps {
+            steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD'),
                                      string(credentialsId: 'git-user-email', variable: 'GIT_EMAIL')]) {
@@ -57,7 +59,7 @@ pipeline {
 
                         git reset --hard
                         git clean -fdx  # removes untracked files and directories
-                                        
+                        
                         # Fetch all branches from the remote
                         git fetch --all
                         
@@ -74,6 +76,26 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh '''
+                    docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} .
+                    '''
+                }
+            }
+        }
+
+        stage('Push Docker Image to Local Docker Registry') {
+            steps {
+                script {
+                    sh '''
+                    docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
+                    '''
+                }
+            }
+        }
     }
 
     post {
@@ -81,7 +103,7 @@ pipeline {
             echo 'Pipeline failed!'
         }
         success {
-            echo 'Code successfully merged to main!'
+            echo 'Code successfully merged to main and Docker image pushed!'
         }
     }
 }
