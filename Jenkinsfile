@@ -17,7 +17,7 @@ pipeline {
                         branches: [[name: "*/${DEV_BRANCH}"]],
                         userRemoteConfigs: [[
                             url: REPO_URL,
-                            credentialsId: 'github-token' 
+                            credentialsId: 'github-token'
                         ]]
                     ])
                 }
@@ -29,8 +29,7 @@ pipeline {
                 script {
                     sh '''
                     python3 -m venv ${VENV_DIR}
-                    source ${VENV_DIR}/bin/activate
-                    pip install -r requirements.txt
+                    bash -c "source ${VENV_DIR}/bin/activate && pip install -r requirements.txt"
                     '''
                 }
             }
@@ -40,8 +39,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    source ${VENV_DIR}/bin/activate
-                    pytest tests/
+                    bash -c "source ${VENV_DIR}/bin/activate && pytest tests/"
                     '''
                 }
             }
