@@ -53,7 +53,10 @@ pipeline {
                         # Set up Git config
                         git config user.email "cagrigoksu.ustundag@gmail.com"
                         git config user.name "Jenkins CI"
-                        
+
+                        git reset --hard
+                        git clean -fdx  # removes untracked files and directories
+                                        
                         # Fetch all branches from the remote
                         git fetch --all
                         
