@@ -46,26 +46,28 @@ pipeline {
         }
 
         stage('Merge to Main') {
-            steps {
+             steps {
                 script {
-                sh '''
-                # Set up Git config
-                git config user.email "cagrigoksu.ustundag@gmail.com"
-                git config user.name "Jenkins CI"
-                
-                # Fetch all branches from the remote
-                git fetch --all
-                
-                # Checkout the main branch
-                git checkout ${MAIN_BRANCH}
-                
-                # Merge the remote dev branch into main
-                git merge origin/${DEV_BRANCH}
-                
-                # Push the changes to the remote main branch
-                git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/cagrigoksu/eu_migration_web_api.git ${MAIN_BRANCH}
-                '''
-             }
+                    withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        sh '''
+                        # Set up Git config
+                        git config user.email "cagrigoksu.ustundag@gmail.com"
+                        git config user.name "Jenkins CI"
+                        
+                        # Fetch all branches from the remote
+                        git fetch --all
+                        
+                        # Checkout the main branch
+                        git checkout ${MAIN_BRANCH}
+                        
+                        # Merge the remote dev branch into main
+                        git merge origin/${DEV_BRANCH}
+                        
+                        # Push the changes to the remote main branch with authentication
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/cagrigoksu/eu_migration_web_api.git ${MAIN_BRANCH}
+                        '''
+                    }
+                }
             }
         }
     }
