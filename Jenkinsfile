@@ -29,7 +29,9 @@ pipeline {
                 script {
                     sh '''
                     python3 -m venv ${VENV_DIR}
-                    bash -c "source ${VENV_DIR}/bin/activate && pip install -r requirements.txt || pip install pytest"
+                    source ${VENV_DIR}/bin/activate
+                    pip install -r requirements.txt
+                    pip install pytest
                     '''
                 }
             }
@@ -39,7 +41,8 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    bash -c "source ${VENV_DIR}/bin/activate && pytest tests/"
+                    source ${VENV_DIR}/bin/activate
+                    pytest tests/
                     '''
                 }
             }
