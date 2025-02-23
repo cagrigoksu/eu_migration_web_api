@@ -54,5 +54,5 @@ jobs:
           git config --global user.name "GitHub Actions"
           git fetch origin
           git checkout main
-          git merge origin/dev
+          git merge origin/dev --allow-unrelated-histories
           git push origin main
