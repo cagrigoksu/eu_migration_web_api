@@ -46,6 +46,11 @@ jobs:
           source venv/bin/activate
           pytest tests/
 
+      - name: Clean up __pycache__ files
+        run: |
+          find . -type d -name '__pycache__' -exec rm -rf {} +
+          git clean -fd
+
       - name: Merge dev into main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
