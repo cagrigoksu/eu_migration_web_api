@@ -25,6 +25,11 @@ jobs:
     needs: setup_environment
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
       - name: Install SQLCipher
         run: |
           sudo apt-get update && sudo apt-get install -y \
@@ -51,6 +56,12 @@ jobs:
     needs: install_dependencies
 
     steps:
+    
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
       - name: Run Tests
         run: |
           source venv/bin/activate
@@ -61,6 +72,12 @@ jobs:
     needs: run_tests
 
     steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
       - name: Clean up __pycache__ files
         run: |
           find . -type d -name '__pycache__' -exec rm -rf {} +
@@ -77,6 +94,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
+          
       - name: Merge dev into main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
