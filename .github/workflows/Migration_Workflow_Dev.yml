@@ -1,0 +1,65 @@
+name: EU Migration WebAPI CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install SQLCipher
+        run: |
+          sudo apt-get update && sudo apt-get install -y \
+            gcc \
+            make \
+            libssl-dev \
+            libffi-dev \
+            python3-dev \
+            sqlcipher \
+            libsqlcipher-dev \
+            build-essential \
+          && sudo rm -rf /var/lib/apt/lists/*
+        
+
+      - name: Install Dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Tests
+        run: |
+          source venv/bin/activate
+          pytest tests/
+
+      - name: Clean up __pycache__ files
+        run: |
+          find . -type d -name '__pycache__' -exec rm -rf {} +
+          git clean -fd
+
+      - name: Merge dev into main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+          git fetch origin
+          git checkout main
+          git merge origin/dev --allow-unrelated-histories
+          git push origin main
