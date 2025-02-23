@@ -6,10 +6,8 @@ on:
       - dev
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write  
+  setup_environment:
+    runs-on: ubuntu-latest 
 
     steps:
       - name: Checkout Repository
@@ -22,6 +20,11 @@ jobs:
         with:
           python-version: '3.12'
 
+  install_dependencies:
+    runs-on: ubuntu-latest
+    needs: setup_environment
+
+    steps:
       - name: Install SQLCipher
         run: |
           sudo apt-get update && sudo apt-get install -y \
@@ -43,16 +46,37 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+  run_tests:
+    runs-on: ubuntu-latest
+    needs: install_dependencies
+
+    steps:
       - name: Run Tests
         run: |
           source venv/bin/activate
           pytest tests/
+  
+  clean_up:
+    runs-on: ubuntu-latest
+    needs: run_tests
 
+    steps:
       - name: Clean up __pycache__ files
         run: |
           find . -type d -name '__pycache__' -exec rm -rf {} +
           git clean -fd
 
+  merge_into_main:
+    runs-on: ubuntu-latest
+    needs: clean_up
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
       - name: Merge dev into main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
