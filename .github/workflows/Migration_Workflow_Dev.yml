@@ -119,7 +119,6 @@ jobs:
   create_release:
     runs-on: ubuntu-latest
     needs: merge_into_main
-    if: github.ref == 'refs/heads/main' 
     permissions:
       contents: write
 
