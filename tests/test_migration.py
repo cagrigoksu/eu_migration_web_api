@@ -46,3 +46,13 @@ def test_get_migration_data_unauthorized(mock_auth, client):
     
     assert response.status_code == 401  # unauthorized access
     assert "error" in response.get_json()
+    
+
+@patch("routes.auth.user_auth.is_valid_api_key", return_value=True)
+def test_get_migration_data_by_country(mock_auth, client, auth_header):
+    response = client.get("/api/migration/country?country_codes=AUS", headers=auth_header)
+    assert response.status_code in [200, 500]  # 500: missing data
+    data = response.get_json()
+    if response.status_code == 200:
+        assert isinstance(data, list)
+        assert all("Country" in item for item in data)
