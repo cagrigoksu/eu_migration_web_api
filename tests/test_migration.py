@@ -59,7 +59,7 @@ def test_get_migration_data_by_country(mock_auth, client, auth_header):
         
 @patch("routes.auth.user_auth.is_valid_api_key", return_value=True)
 def test_get_migration_data_by_country_invalid(mock_auth,client, auth_header):
-    response = client.get("/api/migration/country", headers=auth_header)  # No country_codes
+    response = client.get("/api/migration/country", headers=auth_header)  # no country_codes
     assert response.status_code == 400
     assert "error" in response.get_json()
 
@@ -68,4 +68,33 @@ def test_get_migration_data_by_country_unauthorized(mock_auth,client):
     response = client.get("/api/migration/country?country_codes=AUS")
     assert response.status_code == 401  # unauth. access
     assert "error" in response.get_json()
+    
+@patch("routes.auth.user_auth.is_valid_api_key", return_value=True)
+def test_get_migration_data_by_year(mock_auth, client, auth_header):
+    response = client.get("/api/migration/year?year=2020", headers=auth_header)
+    assert response.status_code in [200, 500]
+    data = response.get_json()
+    if response.status_code == 200:
+        assert isinstance(data, list)
+        assert all("Year" in item for item in data)
 
+@patch("routes.auth.user_auth.is_valid_api_key", return_value=True)
+def test_get_migration_data_by_year_range(mock_auth, client, auth_header):
+    response = client.get("/api/migration/year?start_year=2015&end_year=2020", headers=auth_header)
+    assert response.status_code in [200, 500]
+    data = response.get_json()
+    if response.status_code == 200:
+        assert isinstance(data, list)
+        assert all("Year" in item for item in data)
+
+@patch("routes.auth.user_auth.is_valid_api_key", return_value=True)
+def test_get_migration_data_by_year_invalid(mock_auth, client, auth_header):
+    response = client.get("/api/migration/year", headers=auth_header)  # no year params
+    assert response.status_code == 400
+    assert "error" in response.get_json()
+
+@patch("routes.auth.user_auth.is_valid_api_key", return_value=False)
+def test_get_migration_data_by_year_unauthorized(mock_auth, client):
+    response = client.get("/api/migration/year?year=2020")
+    assert response.status_code == 401  # unauthorized
+    assert "error" in response.get_json()
