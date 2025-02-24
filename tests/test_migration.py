@@ -56,3 +56,16 @@ def test_get_migration_data_by_country(mock_auth, client, auth_header):
     if response.status_code == 200:
         assert isinstance(data, list)
         assert all("Country" in item for item in data)
+        
+@patch("routes.auth.user_auth.is_valid_api_key", return_value=True)
+def test_get_migration_data_by_country_invalid(mock_auth,client, auth_header):
+    response = client.get("/api/migration/country", headers=auth_header)  # No country_codes
+    assert response.status_code == 400
+    assert "error" in response.get_json()
+
+@patch("routes.auth.user_auth.is_valid_api_key", return_value=False)
+def test_get_migration_data_by_country_unauthorized(mock_auth,client):
+    response = client.get("/api/migration/country?country_codes=AUS")
+    assert response.status_code == 401  # unauth. access
+    assert "error" in response.get_json()
+
