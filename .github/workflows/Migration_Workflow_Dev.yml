@@ -163,8 +163,12 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git tag ${{ env.NEW_VERSION }}
-          git push origin ${{ env.NEW_VERSION }}
+          if git rev-parse ${{ env.NEW_VERSION }} >/dev/null 2>&1; then
+            echo "Tag ${{ env.NEW_VERSION }} already exists. Skipping tag creation."
+          else
+            git tag ${{ env.NEW_VERSION }}
+            git push origin ${{ env.NEW_VERSION }}
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
