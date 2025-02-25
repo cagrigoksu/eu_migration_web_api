@@ -127,7 +127,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-          fetch-depth: 0  
+          fetch-depth: 0  # Ensures all tags are available
 
       - name: Fetch all tags
         run: git fetch --tags --force
@@ -148,16 +148,13 @@ jobs:
           LATEST_TAG=${{ env.LATEST_TAG }}
           echo "Latest tag: $LATEST_TAG"
 
-          # Extract Major, Minor, and Patch numbers
           MAJOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\..*/\1/')
           MINOR=$(echo $LATEST_TAG | sed -E 's/v[0-9]+\.([0-9]+).*/\1/')
           PATCH=$(echo $LATEST_TAG | sed -E 's/v[0-9]+\.[0-9]+\.([0-9]+)/\1/')
 
-          # Get the latest commit message
           COMMITS=$(git log -1 --pretty=%B)
           echo "Commit message: $COMMITS"
 
-          # Determine the version bump type
           if echo "$COMMITS" | grep -qE "^major:"; then
             MAJOR=$((MAJOR + 1))
             MINOR=0
@@ -186,13 +183,21 @@ jobs:
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
           fi
 
-      - name: Create new tag
+      - name: Create and Push New Tag
         if: env.TAG_EXISTS == 'false'
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git tag ${{ env.NEW_VERSION }}
           git push origin ${{ env.NEW_VERSION }}
+
+      - name: Verify Tag Exists Before Release
+        run: |
+          if ! git rev-parse "refs/tags/${{ env.NEW_VERSION }}" >/dev/null 2>&1; then
+            echo "ERROR: Tag ${{ env.NEW_VERSION }} was not created successfully."
+            exit 1
+          fi
+          echo "Tag ${{ env.NEW_VERSION }} verified."
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
