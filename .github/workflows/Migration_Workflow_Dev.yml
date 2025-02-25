@@ -174,7 +174,7 @@ jobs:
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "New version: $NEW_VERSION"
 
-      - name: **Debugging NEW_VERSION**
+      - name:
         run: |
           if [[ -z "${{ env.NEW_VERSION }}" ]]; then
             echo "ERROR: NEW_VERSION is empty! Check version bump logic."
@@ -201,7 +201,7 @@ jobs:
           git tag ${{ env.NEW_VERSION }}
           git push origin ${{ env.NEW_VERSION }}
 
-      - name: **Verify Tag Exists Before Release**
+      - name:
         run: |
           echo "Checking if tag ${{ env.NEW_VERSION }} exists..."
           if [[ -z "${{ env.NEW_VERSION }}" ]]; then
