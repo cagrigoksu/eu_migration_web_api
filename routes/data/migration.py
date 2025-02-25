@@ -142,3 +142,4 @@ def get_migration_data_by_year():
 
     filtered_df = filter_data(df_eu, start_year=start_year, end_year=end_year)
     return jsonify(filtered_df.to_dict(orient='records')) if not filtered_df.empty else jsonify({"error": "Data not available"}), 500
+
