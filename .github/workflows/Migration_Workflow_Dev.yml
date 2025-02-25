@@ -19,26 +19,6 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install SQLCipher
-        run: |
-          sudo apt-get update && sudo apt-get install -y \
-            gcc \
-            make \
-            libssl-dev \
-            libffi-dev \
-            python3-dev \
-            sqlcipher \
-            libsqlcipher-dev \
-            build-essential \
-          && sudo rm -rf /var/lib/apt/lists/*
-        
-      - name: Install Dependencies
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
-
       - name: Upload Virtual Environment
         uses: actions/upload-artifact@v4
         with:
@@ -59,11 +39,25 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Reinstall SQLCipher
+      - name: Install SQLCipher
         run: |
           sudo apt-get update && sudo apt-get install -y \
+            gcc \
+            make \
+            libssl-dev \
+            libffi-dev \
+            python3-dev \
             sqlcipher \
-            libsqlcipher-dev 
+            libsqlcipher-dev \
+            build-essential \
+          && sudo rm -rf /var/lib/apt/lists/*
+          
+      - name: Install Dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Download Virtual Environment
         uses: actions/download-artifact@v4
@@ -128,6 +122,9 @@ jobs:
         with:
           ref: main
 
+      - name: Fetch all tags
+        run: git fetch --tags --force
+
       - name: Get latest tag
         id: get_latest_tag
         run: echo "LATEST_TAG=$(git describe --tags --abbrev=0 || echo 'v0.0.0')" >> $GITHUB_ENV
@@ -159,19 +156,27 @@ jobs:
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "New version: $NEW_VERSION"
 
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          if git ls-remote --tags origin | grep -q "refs/tags/${{ env.NEW_VERSION }}"; then
+            echo "Tag already exists. Skipping tag creation."
+            echo "TAG_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "TAG_EXISTS=false" >> $GITHUB_ENV
+          fi
+
       - name: Create new tag
+        if: env.TAG_EXISTS == 'false'
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          if git rev-parse ${{ env.NEW_VERSION }} >/dev/null 2>&1; then
-            echo "Tag ${{ env.NEW_VERSION }} already exists. Skipping tag creation."
-          else
-            git tag ${{ env.NEW_VERSION }}
-            git push origin ${{ env.NEW_VERSION }}
-          fi
+          git tag ${{ env.NEW_VERSION }}
+          git push origin ${{ env.NEW_VERSION }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
+        if: env.TAG_EXISTS == 'false'
         with:
           tag_name: ${{ env.NEW_VERSION }}
           name: Release ${{ env.NEW_VERSION }}
