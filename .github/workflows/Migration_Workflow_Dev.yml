@@ -117,90 +117,92 @@ jobs:
           git push origin main
 
   create_release:
-      runs-on: ubuntu-latest
-      needs: merge_into_main
-      permissions:
-        contents: write
-  
-      steps:
-        - name: Checkout Repository
-          uses: actions/checkout@v4
-          with:
-            ref: main
-            fetch-depth: 0  
-  
-        - name: Fetch all tags
-          run: git fetch --tags --force
-  
-        - name: Get latest tag
-          id: get_latest_tag
-          run: |
-            LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
-            if [[ -z "$LATEST_TAG" ]]; then
-              LATEST_TAG="v0.0.0"
-            fi
-            echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
-            echo "Latest tag found: $LATEST_TAG"
-  
-        - name: Determine version bump
-          id: version_bump
-          run: |
-            LATEST_TAG=${{ env.LATEST_TAG }}
-            echo "Latest tag: $LATEST_TAG"
-  
-            MAJOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\..*/\1/')
-            MINOR=$(echo $LATEST_TAG | sed -E 's/v[0-9]+\.([0-9]+).*/\1/')
-            PATCH=$(echo $LATEST_TAG | sed -E 's/v[0-9]+\.[0-9]+\.([0-9]+)/\1/')
-  
-            COMMITS=$(git log -1 --pretty=%B)
-            echo "Commit message: $COMMITS"
-  
-            if echo "$COMMITS" | grep -qE "^major:"; then
-              MAJOR=$((MAJOR + 1))
-              MINOR=0
-              PATCH=0
-            elif echo "$COMMITS" | grep -qE "^feat:"; then
-              MINOR=$((MINOR + 1))
-              PATCH=0
-            elif echo "$COMMITS" | grep -qE "^fix:"; then
-              PATCH=$((PATCH + 1))
-            else
-              echo "No version bump required. Skipping release."
-              exit 0
-            fi
-  
-            NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
-            echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-            echo "New version: $NEW_VERSION"
-  
-        - name: Check if tag already exists
-          id: check_tag
-          run: |
-            if git rev-parse "refs/tags/${{ env.NEW_VERSION }}" >/dev/null 2>&1; then
-              echo "Tag already exists. Skipping tag creation."
-              echo "TAG_EXISTS=true" >> $GITHUB_ENV
-            else
-              echo "TAG_EXISTS=false" >> $GITHUB_ENV
-            fi
-  
-        - name: Create new tag
-          if: env.TAG_EXISTS == 'false'
-          run: |
-            git config --global user.name "github-actions"
-            git config --global user.email "github-actions@github.com"
-            git tag ${{ env.NEW_VERSION }}
-            git push origin ${{ env.NEW_VERSION }}
-  
-        - name: Create GitHub Release
-          uses: softprops/action-gh-release@v2
-          if: env.TAG_EXISTS == 'false'
-          with:
-            tag_name: ${{ env.NEW_VERSION }}
-            name: Release ${{ env.NEW_VERSION }}
-            body: "Automated release for ${{ env.NEW_VERSION }}"
-            draft: false
-            prerelease: false
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+    runs-on: ubuntu-latest
+    needs: merge_into_main
+    permissions:
+      contents: write
 
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0  
+
+      - name: Fetch all tags
+        run: git fetch --tags --force
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: |
+          LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
+          if [[ -z "$LATEST_TAG" ]]; then
+            LATEST_TAG="v0.0.0"
+          fi
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+          echo "Latest tag found: $LATEST_TAG"
+
+      - name: Determine version bump
+        id: version_bump
+        run: |
+          LATEST_TAG=${{ env.LATEST_TAG }}
+          echo "Latest tag: $LATEST_TAG"
+
+          # Extract Major, Minor, and Patch numbers
+          MAJOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\..*/\1/')
+          MINOR=$(echo $LATEST_TAG | sed -E 's/v[0-9]+\.([0-9]+).*/\1/')
+          PATCH=$(echo $LATEST_TAG | sed -E 's/v[0-9]+\.[0-9]+\.([0-9]+)/\1/')
+
+          # Get the latest commit message
+          COMMITS=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMITS"
+
+          # Determine the version bump type
+          if echo "$COMMITS" | grep -qE "^major:"; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif echo "$COMMITS" | grep -qE "^feat:"; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          elif echo "$COMMITS" | grep -qE "^fix:"; then
+            PATCH=$((PATCH + 1))
+          else
+            echo "No version bump required. Skipping release."
+            exit 0
+          fi
+
+          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "New version: $NEW_VERSION"
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          if git rev-parse "refs/tags/${{ env.NEW_VERSION }}" >/dev/null 2>&1; then
+            echo "Tag already exists. Skipping tag creation."
+            echo "TAG_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "TAG_EXISTS=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create new tag
+        if: env.TAG_EXISTS == 'false'
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git tag ${{ env.NEW_VERSION }}
+          git push origin ${{ env.NEW_VERSION }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: env.TAG_EXISTS == 'false'
+        with:
+          tag_name: ${{ env.NEW_VERSION }}
+          name: Release ${{ env.NEW_VERSION }}
+          body: "Automated release for ${{ env.NEW_VERSION }}"
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
