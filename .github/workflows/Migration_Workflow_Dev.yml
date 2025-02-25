@@ -130,14 +130,14 @@ jobs:
 
       - name: Fetch all tags
         run: git fetch --tags --force
-      
+
       - name: Get latest tag
         id: get_latest_tag
         run: |
-          LATEST_TAG=$(git tag --sort=-v:refname | head -n 1 || echo "v0.0.0")
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
           echo "Latest tag found: $LATEST_TAG"
-      
+
       - name: Determine version bump
         id: version_bump
         run: |
@@ -147,10 +147,10 @@ jobs:
           MAJOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\..*/\1/')
           MINOR=$(echo $LATEST_TAG | sed -E 's/v[0-9]+\.([0-9]+).*/\1/')
           PATCH=$(echo $LATEST_TAG | sed -E 's/v[0-9]+\.[0-9]+\.([0-9]+)/\1/')
-      
+
           COMMITS=$(git log -1 --pretty=%B)
           echo "Commit message: $COMMITS"
-      
+
           if echo "$COMMITS" | grep -qE "major:"; then
             MAJOR=$((MAJOR + 1))
             MINOR=0
@@ -164,20 +164,20 @@ jobs:
             echo "No version bump required. Skipping release."
             exit 0
           fi
-      
+
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "New version: $NEW_VERSION"
-      
+
       - name: Check if tag already exists
         id: check_tag
         run: |
-          if git fetch --tags && git tag | grep -q "^${{ env.NEW_VERSION }}$"; then
+          if git ls-remote --tags origin | grep -q "refs/tags/${{ env.NEW_VERSION }}"; then
             echo "Tag already exists. Skipping tag creation."
             echo "TAG_EXISTS=true" >> $GITHUB_ENV
           else
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
-          fi        
+          fi
 
       - name: Create new tag
         if: env.TAG_EXISTS == 'false'
