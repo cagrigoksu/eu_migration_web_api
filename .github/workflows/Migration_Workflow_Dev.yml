@@ -133,7 +133,10 @@ jobs:
 
       - name: Get latest tag
         id: get_latest_tag
-        run: echo "LATEST_TAG=$(git describe --tags --abbrev=0 || echo 'v0.0.0')" >> $GITHUB_ENV
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+          echo "Latest tag found: $LATEST_TAG"
 
       - name: Determine version bump
         id: version_bump
@@ -141,17 +144,13 @@ jobs:
           LATEST_TAG=${{ env.LATEST_TAG }}
           echo "Latest tag: $LATEST_TAG"
           
-          # Extract major, minor, and patch numbers
           MAJOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\..*/\1/')
           MINOR=$(echo $LATEST_TAG | sed -E 's/v[0-9]+\.([0-9]+).*/\1/')
           PATCH=$(echo $LATEST_TAG | sed -E 's/v[0-9]+\.[0-9]+\.([0-9]+)/\1/')
-      
-          # Get the latest commit message
+
           COMMITS=$(git log -1 --pretty=%B)
-      
           echo "Commit message: $COMMITS"
-      
-          # Determine version increment
+
           if echo "$COMMITS" | grep -qE "major:"; then
             MAJOR=$((MAJOR + 1))
             MINOR=0
@@ -159,14 +158,16 @@ jobs:
           elif echo "$COMMITS" | grep -qE "feat:"; then
             MINOR=$((MINOR + 1))
             PATCH=0
-          else
+          elif echo "$COMMITS" | grep -qE "fix:"; then
             PATCH=$((PATCH + 1))
+          else
+            echo "No version bump required. Skipping release."
+            exit 0
           fi
-      
-          # Construct new version
+
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-          echo "New version: $NEW_VERSION"      
+          echo "New version: $NEW_VERSION"
 
       - name: Check if tag already exists
         id: check_tag
