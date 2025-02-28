@@ -199,7 +199,9 @@ jobs:
         run: |
           echo "Checking if NEW_VERSION is set: ${{ env.NEW_VERSION }}"
           
-          if [[ -z "${{ env.NEW_VERSION }}" ]]; then
+          echo "NEW_VERSION is: $NEW_VERSION"
+
+          if [[ -z "$NEW_VERSION" ]]; then
             echo "Error: NEW_VERSION is empty!"
             exit 1
           fi
