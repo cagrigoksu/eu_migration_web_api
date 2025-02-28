@@ -171,10 +171,12 @@ jobs:
             PATCH=$((PATCH + 1))
             NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           else
+            echo "No valid version bump detected."
             exit 0
           fi
 
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "New Version: $NEW_VERSION"
 
       - name: Check if tag already exists
         id: check_tag
@@ -195,15 +197,23 @@ jobs:
 
       - name: Verify Tag Exists Before Release
         run: |
+          echo "Checking if NEW_VERSION is set: ${{ env.NEW_VERSION }}"
+          
           if [[ -z "${{ env.NEW_VERSION }}" ]]; then
-            exit 1
-          fi
-          if git rev-parse "refs/tags/${{ env.NEW_VERSION }}" >/dev/null 2>&1; then
-            echo "Tag ${{ env.NEW_VERSION }} verified."
-          else
+            echo "Error: NEW_VERSION is empty!"
             exit 1
           fi
 
+          echo "Available tags:"
+          git tag -l
+          
+          if git rev-parse "refs/tags/${{ env.NEW_VERSION }}" >/dev/null 2>&1; then
+            echo "Tag ${{ env.NEW_VERSION }} verified."
+          else
+            echo "Error: Tag ${{ env.NEW_VERSION }} does not exist!"
+            exit 1
+          fi  
+  
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: env.TAG_EXISTS == 'false'
