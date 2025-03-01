@@ -121,6 +121,9 @@ jobs:
     needs: merge_into_main
     permissions:
       contents: write
+    
+    outputs: 
+      new_version: ${{ steps.version.outputs.new_version }}
 
     steps:
       - name: Checkout Repository
