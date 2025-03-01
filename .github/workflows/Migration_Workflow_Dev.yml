@@ -226,7 +226,7 @@ jobs:
             pip install --upgrade pip
             pip install -r requirements.txt
 
-            sudo supervisorctl restart app
+            sudo supervisorctl restart eu_migration
           EOF
 
       - name: Cleanup Private Key
