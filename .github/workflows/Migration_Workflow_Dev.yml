@@ -227,14 +227,13 @@ jobs:
             pip install -r requirements.txt
 
             sudo supervisorctl restart eu_migration
+            
+            rm -f ~/eu_migration_web_api/ec2_key.pem
+            rm -rf ~/eu_migration_web_api/tests/
+            rm -f ~/eu_migration_web_api/Jenkinsfile
+            rm -rf ~/eu_migration_web_api/__pycache__
+            rm -f ~/eu_migration_web_api/dockerfile
           EOF
 
-      - name: Cleanup Private Key and Others
-        run: |
-          [ -f eu_migration_web_api/eu_migration.pem ] && rm -f eu_migration_web_api/eu_migration.pem
-          [ -d eu_migration_web_api/tests ] && rm -rf eu_migration_web_api/tests/
-          [ -f eu_migration_web_api/Jenkinsfile ] && rm -f eu_migration_web_api/Jenkinsfile
-          [ -d eu_migration_web_api/__pycache__ ] && rm -rf eu_migration_web_api/__pycache__
-          [ -f eu_migration_web_api/dockerfile ] && rm -f eu_migration_web_api/dockerfile
-
-
+      - name: Cleanup Private Key on GitHub Runner
+        run: rm -f ec2_key.pem
