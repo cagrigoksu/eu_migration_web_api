@@ -13,6 +13,13 @@ app.register_blueprint(migration_bp, url_prefix='/api/migration')
 app.register_blueprint(analytics_bp, url_prefix='/analytics')
 create_dash_app(app)
 
+def get_version():
+    try:
+        with open("version.txt", "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return "unknown"
+
 # Swagger Configuration
 swagger = Swagger(app, template={
     "swagger": "2.0",
@@ -41,7 +48,8 @@ swagger = Swagger(app, template={
 
 @app.route('/')
 def main():
-    return 'Europe Immigration/Emigration Analysis on AWS EC2'
+    version = get_version()
+    return f'Europe Immigration/Emigration Analysis on AWS EC2 - Version: {version}'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080) 
