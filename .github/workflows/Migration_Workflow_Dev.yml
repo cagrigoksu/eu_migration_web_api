@@ -18,7 +18,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
+        
+        # pysqlcipher3 depends on this sqlcipher and libsqlcipher-dev 
       - name: Install SQLCipher
         run: |
           sudo apt-get update && sudo apt-get install -y \
@@ -27,8 +28,8 @@ jobs:
             libssl-dev \
             libffi-dev \
             python3-dev \
-            sqlcipher \     # pysqlcipher3 depends on this
-            libsqlcipher-dev \     # pysqlcipher3 depends on this
+            sqlcipher \    
+            libsqlcipher-dev \    
             build-essential \
           && sudo rm -rf /var/lib/apt/lists/*
         
