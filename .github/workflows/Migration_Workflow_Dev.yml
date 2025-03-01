@@ -229,7 +229,7 @@ jobs:
             sudo supervisorctl restart eu_migration
           EOF
 
-      - name: Cleanup Private Key
+      - name: Cleanup Private Key and Others
         run: rm -f eu_migration.pem
 
 
