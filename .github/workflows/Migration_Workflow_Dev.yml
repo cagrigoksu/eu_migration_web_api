@@ -67,6 +67,9 @@ jobs:
       - name: Fix Permissions for Virtual Environment
         run: chmod -R +x venv/bin
 
+      - name: Set SQLCipher Library Path
+        run: echo "LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
       - name: Run Tests
         run: |
           source venv/bin/activate
