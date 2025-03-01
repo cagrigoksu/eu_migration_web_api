@@ -139,8 +139,8 @@ jobs:
       - name: Get commit message
         id: commit
         run: |
-          message=$(git log -1 --pretty=%B)
-          echo "message=$message" >> $GITHUB_OUTPUT
+          message=$(git log --oneline -n 1 origin/dev | cut -d' ' -f2-)
+          echo "message=$message" >> $GITHUB_OUTPUT  
 
       - name: Calculate new version
         id: version
