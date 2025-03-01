@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: dev
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,8 +27,8 @@ jobs:
             libssl-dev \
             libffi-dev \
             python3-dev \
-            sqlcipher \
-            libsqlcipher-dev \
+            sqlcipher \     # pysqlcipher3 depends on this
+            libsqlcipher-dev \     # pysqlcipher3 depends on this
             build-essential \
           && sudo rm -rf /var/lib/apt/lists/*
         
@@ -36,9 +38,6 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Fix Permissions
-        run: chmod -R +x venv/bin
 
       - name: Upload Virtual Environment
         uses: actions/upload-artifact@v4
@@ -52,11 +51,20 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: dev
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      # system-wide dependencies outside of venv are not moved. Need to be installed again.
+      - name: Reinstall SQLCipher
+        run: |
+          sudo apt-get update && sudo apt-get install -y \
+            sqlcipher \
+            libsqlcipher-dev 
 
       - name: Download Virtual Environment
         uses: actions/download-artifact@v4
@@ -64,14 +72,8 @@ jobs:
           name: venv
           path: venv/
 
-      - name: Fix Permissions for Virtual Environment
+      - name: Fix Permissions
         run: chmod -R +x venv/bin
-
-      - name: Link SQLCipher Library
-        run: sudo ln -s /usr/lib/x86_64-linux-gnu/libsqlcipher.so.1 /usr/lib/libsqlcipher.so.1
-
-      - name: Set SQLCipher Library Path
-        run: echo "LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Run Tests
         run: |
@@ -84,10 +86,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: dev
 
       - name: Clean up __pycache__ files
         run: |
           find . -type d -name '__pycache__' -exec rm -rf {} +
+          git clean -fd
 
   merge_into_main:
     runs-on: ubuntu-latest
@@ -98,6 +103,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Merge dev into main
         env:
@@ -120,6 +127,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Get latest tag
@@ -140,18 +148,14 @@ jobs:
         run: |
           current_version="${{ steps.latest-tag.outputs.tag }}"
           commit_message="${{ steps.commit.outputs.message }}"
-
-          current_version=${current_version#v}
-
+          current_version=${current_version#v}  # Remove 'v' prefix
           if [[ -z "$current_version" ]]; then
             new_version="v0.0.1"
           else
             IFS='.' read -r major minor patch <<< "$current_version"
-
             [ -z "$major" ] && major=0
             [ -z "$minor" ] && minor=0
             [ -z "$patch" ] && patch=0
-
             if [[ "$commit_message" =~ "major:" ]]; then
               major=$((major + 1))
               minor=0
@@ -165,10 +169,8 @@ jobs:
               echo "No version bump required"
               exit 0
             fi
-
             new_version="v${major}.${minor}.${patch}"
           fi
-
           echo "new_version=$new_version" >> $GITHUB_OUTPUT  
 
       - name: Create Tag
