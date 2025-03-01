@@ -11,8 +11,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          ref: dev
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -39,6 +37,9 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Fix Permissions
+        run: chmod -R +x venv/bin
+
       - name: Upload Virtual Environment
         uses: actions/upload-artifact@v4
         with:
@@ -51,28 +52,17 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          ref: dev
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Reinstall SQLCipher
-        run: |
-          sudo apt-get update && sudo apt-get install -y \
-            sqlcipher \
-            libsqlcipher-dev 
-
       - name: Download Virtual Environment
         uses: actions/download-artifact@v4
         with:
           name: venv
           path: venv/
-
-      - name: Fix Permissions
-        run: chmod -R +x venv/bin
 
       - name: Run Tests
         run: |
@@ -85,13 +75,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          ref: dev
 
       - name: Clean up __pycache__ files
         run: |
           find . -type d -name '__pycache__' -exec rm -rf {} +
-          git clean -fd
 
   merge_into_main:
     runs-on: ubuntu-latest
@@ -102,8 +89,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: Merge dev into main
         env:
@@ -126,7 +111,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: main
           fetch-depth: 0
 
       - name: Get latest tag
@@ -148,7 +132,7 @@ jobs:
           current_version="${{ steps.latest-tag.outputs.tag }}"
           commit_message="${{ steps.commit.outputs.message }}"
 
-          current_version=${current_version#v}  # Remove 'v' prefix
+          current_version=${current_version#v}
 
           if [[ -z "$current_version" ]]; then
             new_version="v0.0.1"
@@ -198,4 +182,3 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
