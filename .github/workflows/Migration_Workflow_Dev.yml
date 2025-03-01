@@ -218,17 +218,14 @@ jobs:
           chmod 600 eu_migration.pem
           
           ssh -o StrictHostKeyChecking=no -i eu_migration.pem $USER@$HOST << 'EOF'
-            cd ~/app
+            cd ~/eu_migration_web_api
 
-            # Pull the latest changes
             git pull origin main
 
-            # Activate virtual environment and install dependencies
             source venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt
 
-            # Restart the application using Supervisor
             sudo supervisorctl restart app
           EOF
 
@@ -236,4 +233,3 @@ jobs:
         run: rm -f eu_migration.pem
 
 
-        
