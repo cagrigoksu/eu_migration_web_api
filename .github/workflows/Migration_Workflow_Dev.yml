@@ -64,6 +64,9 @@ jobs:
           name: venv
           path: venv/
 
+      - name: Fix Permissions for Virtual Environment
+        run: chmod -R +x venv/bin
+
       - name: Run Tests
         run: |
           source venv/bin/activate
