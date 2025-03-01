@@ -230,6 +230,11 @@ jobs:
           EOF
 
       - name: Cleanup Private Key and Others
-        run: rm -f eu_migration.pem
+        run: |
+          [ -f eu_migration_web_api/eu_migration.pem ] && rm -f eu_migration_web_api/eu_migration.pem
+          [ -d eu_migration_web_api/tests ] && rm -rf eu_migration_web_api/tests/
+          [ -f eu_migration_web_api/Jenkinsfile ] && rm -f eu_migration_web_api/Jenkinsfile
+          [ -d eu_migration_web_api/__pycache__ ] && rm -rf eu_migration_web_api/__pycache__
+          [ -f eu_migration_web_api/dockerfile ] && rm -f eu_migration_web_api/dockerfile
 
 
