@@ -133,7 +133,7 @@ jobs:
         id: latest-tag
         run: |
           git fetch --tags
-          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           echo "tag=$latest_tag" >> $GITHUB_OUTPUT
 
       - name: Get commit message
@@ -167,7 +167,7 @@ jobs:
             patch=$((patch + 1))
           fi
 
-          if [[ -z "$current_version" || "$current_version" == "v0.0.0" ]]; then
+          if [[ -z "$current_version" ]]; then
             new_version="v0.0.1"
           else
             new_version="v${major}.${minor}.${patch}"
@@ -175,11 +175,26 @@ jobs:
 
           echo "new_version=$new_version" >> $GITHUB_OUTPUT
 
-      - name: Create Release
+      - name: Create Tag
         if: steps.version.outputs.new_version != ''
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git tag ${{ steps.version.outputs.new_version }}
           git push origin ${{ steps.version.outputs.new_version }}
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.new_version != ''
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.new_version }}
+          name: Release ${{ steps.version.outputs.new_version }}
+          body: |
+            ## Changes
+            - ${{ steps.commit.outputs.message }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
