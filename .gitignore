@@ -1,5 +1,6 @@
 env/
 apikeys.db
+eu_migration.pem
 
 __pycache__/
 *.pyc
