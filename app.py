@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flasgger import Swagger
 
 from routes.auth.user_auth import auth_bp 
@@ -49,7 +49,8 @@ swagger = Swagger(app, template={
 @app.route('/')
 def main():
     version = get_version()
-    return f'Europe Immigration/Emigration Analysis on AWS EC2 - Version: {version}'
+    #return f'Europe Immigration/Emigration Analysis on AWS EC2 - Version: {version}'
+    return render_template("index.html", version=version)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080) 

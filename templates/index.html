@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Europe Migration Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Europe Migration Analysis</h1>
+    </header>
+    <main>
+        <section class="map">
+            <img src="{{ url_for('static', filename='img/europe_map.png') }}" alt="Europe Migration Map">
+            <div class="map-text">
+                <h2>Europe Migration Overview</h2>
+                <p>This visualization and analysis project represents migration trends across Europe, illustrating key regions with significant immigration and 
+                    emigration patterns. Additionally, this project provides web API endpoints, allowing users to access migration data programmatically 
+                    at <a href="{{ request.host_url }}apidoc" target="_blank">API Documentation.</a>. Furthermore, it features an interactive Plotly dashboard 
+                    for dynamic visualization of the datasets, enabling users to explore trends and insights effectively.</p>
+                <h3>Dynamic Visualization Tool</h3>
+                <h5><a href="{{ request.host_url }}analytics/dashboard" target="_blank">Dashboard</a></h5>
+                <h5><a href="{{ request.host_url }}analytics/map" target="_blank">Map Visual</a></h5>
+            </div>
+        </section>
+        
+        <section class="datasets" style="margin-top: 2%;">
+            <h2>Datasets</h2>
+            <p>Immigration Dataset: <a href="https://ec.europa.eu/eurostat/databrowser/product/page/tps00176" target="_blank">Eurostat - Immigration Dataset</a></p>
+            <p>Emigration Dataset: <a href="https://ec.europa.eu/eurostat/databrowser/product/page/tps00177" target="_blank">Eurostat - Emigration Dataset</a></p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Europe Migration Analysis - {{ version }}</p>
+    </footer>
+</body>
+</html>

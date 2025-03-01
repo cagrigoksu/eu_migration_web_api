@@ -1,0 +1,41 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #e3f2fd;
+    overflow: hidden;
+}
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+.datasets, .map {
+    width: 80%;
+    max-width: 900px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.map {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+.map img {
+    width: 45%;
+    max-width: 400px;
+    border-radius: 10px;
+}
+.map-text {
+    width: 50%;
+    text-align: left;
+    padding: 10px;
+}
