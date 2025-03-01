@@ -148,32 +148,35 @@ jobs:
           current_version="${{ steps.latest-tag.outputs.tag }}"
           commit_message="${{ steps.commit.outputs.message }}"
 
-          current_version=${current_version#v}
-
-          IFS='.' read -r major minor patch <<< "$current_version"
-
-          [ -z "$major" ] && major=0
-          [ -z "$minor" ] && minor=0
-          [ -z "$patch" ] && patch=0
-
-          if [[ "$commit_message" =~ "major:" ]]; then
-            major=$((major + 1))
-            minor=0
-            patch=0
-          elif [[ "$commit_message" =~ "feat:" ]]; then
-            minor=$((minor + 1))
-            patch=0
-          elif [[ "$commit_message" =~ "fix:" ]]; then
-            patch=$((patch + 1))
-          fi
+          current_version=${current_version#v}  # Remove 'v' prefix
 
           if [[ -z "$current_version" ]]; then
             new_version="v0.0.1"
           else
+            IFS='.' read -r major minor patch <<< "$current_version"
+
+            [ -z "$major" ] && major=0
+            [ -z "$minor" ] && minor=0
+            [ -z "$patch" ] && patch=0
+
+            if [[ "$commit_message" =~ "major:" ]]; then
+              major=$((major + 1))
+              minor=0
+              patch=0
+            elif [[ "$commit_message" =~ "feat:" ]]; then
+              minor=$((minor + 1))
+              patch=0
+            elif [[ "$commit_message" =~ "fix:" ]]; then
+              patch=$((patch + 1))
+            else
+              echo "No version bump required"
+              exit 0
+            fi
+
             new_version="v${major}.${minor}.${patch}"
           fi
 
-          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT  
 
       - name: Create Tag
         if: steps.version.outputs.new_version != ''
@@ -196,4 +199,3 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
