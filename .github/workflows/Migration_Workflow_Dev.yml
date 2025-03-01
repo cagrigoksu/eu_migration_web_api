@@ -199,7 +199,7 @@ jobs:
       - name: Update Version File
         if: steps.version.outputs.new_version != ''
         run: |
-          echo "version = ${{ steps.version.outputs.new_version }}" > version.txt
+          echo "${{ steps.version.outputs.new_version }}" > version.txt
           git add version.txt
           git commit -m "Update version file to ${{ steps.version.outputs.new_version }}"
           git push origin main
