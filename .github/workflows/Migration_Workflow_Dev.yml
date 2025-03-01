@@ -180,4 +180,4 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git tag ${{ steps.version.outputs.new_version }}
-          git push origin ${{ steps.version.outputs.new_versi
+          git push origin ${{ steps.version.outputs.new_version }}
