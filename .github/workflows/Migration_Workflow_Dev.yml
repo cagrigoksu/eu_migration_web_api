@@ -1,4 +1,4 @@
-name: EU Migration WebAPI CI/CD Pipeline
+name: EU Migration Web API CI/CD Pipeline
 
 on:
   push:
