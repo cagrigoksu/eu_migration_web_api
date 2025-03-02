@@ -5,8 +5,9 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #e3f2fd;
+    background-color: #f4f4f4;
     overflow: hidden;
+    font-family: Arial, sans-serif;
 }
 main {
     display: flex;
@@ -38,4 +39,13 @@ main {
     width: 50%;
     text-align: left;
     padding: 10px;
+}
+
+h2, h3 {
+    color: #333;
+}
+
+h5 {
+    font-size: 18px;
+    color: #555;
 }
