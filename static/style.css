@@ -6,15 +6,17 @@ body {
     height: 100vh;
     margin: 0;
     background-color: #f4f4f4;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
+    font-family: "Inter", Arial, sans-serif;
 }
+
 main {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
+    padding: 20px;
 }
+
 .datasets, .map {
     width: 80%;
     max-width: 900px;
@@ -23,18 +25,26 @@ main {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
+    transition: transform 0.2s ease-in-out;
 }
+
+.datasets:hover, .map:hover {
+    transform: scale(1.02);
+}
+
 .map {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
 }
+
 .map img {
     width: 45%;
     max-width: 400px;
     border-radius: 10px;
 }
+
 .map-text {
     width: 50%;
     text-align: left;
@@ -43,9 +53,38 @@ main {
 
 h2, h3 {
     color: #333;
+    font-size: 1.8rem;
 }
 
 h5 {
     font-size: 18px;
     color: #555;
+}
+
+@media screen and (max-width: 768px) {
+    body {
+        height: auto;
+        overflow: auto;
+    }
+
+    main {
+        padding: 10px;
+    }
+
+    .datasets, .map {
+        width: 90%;
+    }
+
+    .map img {
+        width: 100%;
+        max-width: 250px;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    h5 {
+        font-size: 16px;
+    }
 }
