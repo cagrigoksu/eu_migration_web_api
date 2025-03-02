@@ -6,8 +6,11 @@ import plotly.express as px
 import plotly.graph_objs as go
 import dash
 from dash import dcc, html, Input, Output
+import datetime
 
 analytics_bp = Blueprint("analytics", __name__)
+
+CURRENT_YEAR = datetime.datetime.now().year   
 
 # get dataframe
 ds_ops.check_file_exist() or ds_ops.prepare_migrations_file()
@@ -32,73 +35,152 @@ def create_dash_app(flask_app):
             dcc.Dropdown(
                 id= prefix+"-country-dropdown",
                 options=[{"label": c, "value": c} for c in df_eu["Country"].unique()],
-                value=None,
-                placeholder="All Countries"
+                placeholder="All Countries",
+                multi=True,
+                value=[]
             )
-        ])
+        ])    
     
     def create_start_year_filter_controls(prefix):
         return html.Div([
             html.Label("Select Start Year:"),
-            dcc.Input(id=prefix+"-start-year", type="number", placeholder="Start Year")
+            dcc.Input(id=prefix+"-start-year", type="number", value = 2011, placeholder="Start Year")
         ])
-        
+          
     def create_end_year_filter_controls(prefix):
         return html.Div([
             html.Label("Select End Year:"),
-            dcc.Input(id=prefix+"-end-year", type="number", placeholder="End Year")
+            dcc.Input(id=prefix+"-end-year", type="number", value=CURRENT_YEAR, placeholder="End Year")
         ])
         
     dash_app.layout = html.Div([
-        html.H1("EU Migration Data Dashboard", style={'textAlign': 'center'}),
+        html.H1("EU Migration Data Dashboard", style={'textAlign': 'center', 'color': '#333'}),
 
         html.Div([
-            
-            # Line chart
             html.Div([
                 html.H2("Net Migration Trends"),
                 create_country_filter_controls("line"),
                 create_start_year_filter_controls("line"),
                 create_end_year_filter_controls("line"),                
                 dcc.Graph(id="line-chart")
-              ], className="chart-box")            
-            ]),
-        
-            # Bar chart
+            ], className="chart-box"),
+
             html.Div([
                 html.H2("Immigration vs Emigration"),
                 create_country_filter_controls("bar"),
                 create_start_year_filter_controls("bar"),
                 create_end_year_filter_controls("bar"),           
                 dcc.Graph(id="bar-chart")
-            ], className="chart-box"),
-            
-            # Pie chart
+            ], className="chart-box")
+        ], className="row-container"),
+
+        html.Div([
             html.Div([
                 html.H2("Immigration Proportion by Country"),
                 create_start_year_filter_controls("pie"),
                 create_end_year_filter_controls("pie"),   
                 dcc.Graph(id="pie-chart")
             ], className="chart-box"),
-            
-            # Stacked bar chart
+
             html.Div([
                 html.H2("Stacked Immigration & Emigration Trends"),
                 create_country_filter_controls("stacked-bar"),
                 create_start_year_filter_controls("stacked-bar"),
                 create_end_year_filter_controls("stacked-bar"),
                 dcc.Graph(id="stacked-bar-chart")
-            ], className="chart-box"),
-            
-            # Bubble chart
+            ], className="chart-box")
+        ], className="row-container"),
+
+        html.Div([
             html.Div([
                 html.H2("Net Migration with Bubble Size Based on Total Migration"),
                 create_country_filter_controls("bubble"),
                 create_start_year_filter_controls("bubble"),
                 create_end_year_filter_controls("bubble"),
                 dcc.Graph(id="bubble-chart")
-            ], className="chart-box")
-    ])
+            ], className="full-width-chart")
+        ])
+    ], className="main-container")
+
+    dash_app.css.append_css({
+        "external_url": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    })
+
+    dash_app.index_string = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>EU Migration Dashboard</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                }
+
+                .main-container {
+                    width: 90%;
+                    margin: auto;
+                    padding: 20px;
+                }
+
+                .row-container {
+                    display: flex;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    margin-bottom: 20px;
+                }
+
+                .chart-box {
+                    flex: 1;
+                    min-width: 45%;
+                    background: white;
+                    padding: 20px;
+                    margin: 10px;
+                    border-radius: 8px;
+                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                }
+
+                .full-width-chart {
+                    width: 100%;
+                    background: white;
+                    padding: 20px;
+                    margin: 10px 0;
+                    border-radius: 8px;
+                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                }
+
+                h1 {
+                    text-align: center;
+                    color: #333;
+                }
+
+                h2 {
+                    font-size: 18px;
+                    color: #555;
+                }
+
+                label {
+                    font-weight: bold;
+                    margin-top: 10px;
+                    display: block;
+                }
+            </style>
+        </head>
+        <body>
+            <div id="dash-container">
+                {%app_entry%}
+            </div>
+            <footer>
+                {%config%}
+                {%scripts%}
+                {%renderer%}
+            </footer>
+        </body>
+        </html>
+        """
+
 
    
     @dash_app.callback(
@@ -106,12 +188,12 @@ def create_dash_app(flask_app):
         Input("line-country-dropdown", "value"),
         Input("line-start-year", "value"),
         Input("line-end-year", "value"))
-    def update_line_charts(selected_country, start_year, end_year):
+    def update_line_charts(selected_countries, start_year, end_year):
         df = df_eu.copy()
 
         # Apply filters
-        if selected_country:
-            df = df[df["Country"] == selected_country]
+        if selected_countries:
+            df = df[df["Country"].isin(selected_countries)]
         if start_year and end_year:
             df = df[(df["Year"] >= start_year) & (df["Year"] <= end_year)]
 
@@ -124,11 +206,11 @@ def create_dash_app(flask_app):
     Input("bar-country-dropdown", "value"),
     Input("bar-start-year", "value"),
     Input("bar-end-year", "value"))
-    def update_bar_charts(selected_country, start_year, end_year):
+    def update_bar_charts(selected_countries, start_year, end_year):
         df = df_eu.copy()
         
-        if selected_country:
-            df = df[df["Country"] == selected_country]
+        if selected_countries:
+            df = df[df["Country"].isin(selected_countries)]
         if start_year and end_year:
             df = df[(df["Year"] >= start_year) & (df["Year"] <= end_year)]
 
@@ -159,11 +241,11 @@ def create_dash_app(flask_app):
     Input("stacked-bar-country-dropdown", "value"),
     Input("stacked-bar-start-year", "value"),
     Input("stacked-bar-end-year", "value"))
-    def update_stacked_bar_charts(selected_country, start_year, end_year):
+    def update_stacked_bar_charts(selected_countries, start_year, end_year):
         df = df_eu.copy()
         
-        if selected_country:
-            df = df[df["Country"] == selected_country]
+        if selected_countries:
+            df = df[df["Country"].isin(selected_countries)]
         
         if start_year and end_year:
             df = df[(df["Year"] >= start_year) & (df["Year"] <= end_year)]
@@ -180,11 +262,11 @@ def create_dash_app(flask_app):
     Input("bubble-country-dropdown", "value"),
     Input("bubble-start-year", "value"),
     Input("bubble-end-year", "value"))
-    def update_bubble_charts(selected_country, start_year, end_year):
+    def update_bubble_charts(selected_countries, start_year, end_year):
         df = df_eu.copy()
         
-        if selected_country:
-            df = df[df["Country"] == selected_country]
+        if selected_countries:
+            df = df[df["Country"].isin(selected_countries)]
         
         if start_year and end_year:
             df = df[(df["Year"] >= start_year) & (df["Year"] <= end_year)]
