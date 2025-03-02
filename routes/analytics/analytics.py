@@ -35,8 +35,9 @@ def create_dash_app(flask_app):
             dcc.Dropdown(
                 id= prefix+"-country-dropdown",
                 options=[{"label": c, "value": c} for c in df_eu["Country"].unique()],
-                value=None,
-                placeholder="All Countries"
+                placeholder="All Countries",
+                multi=True,
+                value=[]
             )
         ])    
     
@@ -187,12 +188,12 @@ def create_dash_app(flask_app):
         Input("line-country-dropdown", "value"),
         Input("line-start-year", "value"),
         Input("line-end-year", "value"))
-    def update_line_charts(selected_country, start_year, end_year):
+    def update_line_charts(selected_countries, start_year, end_year):
         df = df_eu.copy()
 
         # Apply filters
-        if selected_country:
-            df = df[df["Country"] == selected_country]
+        if selected_countries:
+            df = df[df["Country"].isin(selected_countries)]
         if start_year and end_year:
             df = df[(df["Year"] >= start_year) & (df["Year"] <= end_year)]
 
@@ -205,11 +206,11 @@ def create_dash_app(flask_app):
     Input("bar-country-dropdown", "value"),
     Input("bar-start-year", "value"),
     Input("bar-end-year", "value"))
-    def update_bar_charts(selected_country, start_year, end_year):
+    def update_bar_charts(selected_countries, start_year, end_year):
         df = df_eu.copy()
         
-        if selected_country:
-            df = df[df["Country"] == selected_country]
+        if selected_countries:
+            df = df[df["Country"].isin(selected_countries)]
         if start_year and end_year:
             df = df[(df["Year"] >= start_year) & (df["Year"] <= end_year)]
 
@@ -240,11 +241,11 @@ def create_dash_app(flask_app):
     Input("stacked-bar-country-dropdown", "value"),
     Input("stacked-bar-start-year", "value"),
     Input("stacked-bar-end-year", "value"))
-    def update_stacked_bar_charts(selected_country, start_year, end_year):
+    def update_stacked_bar_charts(selected_countries, start_year, end_year):
         df = df_eu.copy()
         
-        if selected_country:
-            df = df[df["Country"] == selected_country]
+        if selected_countries:
+            df = df[df["Country"].isin(selected_countries)]
         
         if start_year and end_year:
             df = df[(df["Year"] >= start_year) & (df["Year"] <= end_year)]
@@ -261,11 +262,11 @@ def create_dash_app(flask_app):
     Input("bubble-country-dropdown", "value"),
     Input("bubble-start-year", "value"),
     Input("bubble-end-year", "value"))
-    def update_bubble_charts(selected_country, start_year, end_year):
+    def update_bubble_charts(selected_countries, start_year, end_year):
         df = df_eu.copy()
         
-        if selected_country:
-            df = df[df["Country"] == selected_country]
+        if selected_countries:
+            df = df[df["Country"].isin(selected_countries)]
         
         if start_year and end_year:
             df = df[(df["Year"] >= start_year) & (df["Year"] <= end_year)]
