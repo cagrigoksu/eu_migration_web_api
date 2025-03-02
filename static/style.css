@@ -25,11 +25,14 @@ main {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
-    transition: transform 0.2s ease-in-out;
 }
 
-.datasets:hover, .map:hover {
-    transform: scale(1.02);
+.datasets_trans {
+    transition: transform 0.05s ease-in-out;
+}
+
+.datasets:hover {
+    transform: scale(1.04);
 }
 
 .map {
