@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Integration - EU Migration Web API{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="integration-header">
+        <h2>Integration Data</h2>
+        <p>Visualize and explore European migration statistics</p>
+    </div>
+
+    <div class="integration-alert">
+        <p><strong>Note:</strong> Use the API endpoints with your preferred charting library (Plotly, Chart.js, etc.)</p>
+    </div>
+
+    <div class="integration-grid">
+        <div class="integration-card">
+            <h3>Features</h3>
+            <ul>
+                <li>Migration trends over time</li>
+                <li>Country comparisons</li>
+                <li>Top immigration/emigration countries</li>
+                <li>Year-over-year growth analysis</li>
+                <li>Migration balance analysis</li>
+                <li>Statistical distributions</li>
+            </ul>
+        </div>
+
+        <div class="integration-card">
+            <h3>Integration Guide</h3>
+            <p>Use these endpoints to build your own dashboard:</p>
+            <div class="code-snippet">
+                <code>GET /api/analytics/trends</code>
+            </div>
+            <div class="code-snippet">
+                <code>GET /api/analytics/comparison</code>
+            </div>
+            <div class="code-snippet">
+                <code>GET /api/analytics/top</code>
+            </div>
+            <a href="/apidocs" class="btn btn-sm">View API Docs</a>
+        </div>
+
+        <div class="integration-card">
+            <h3>Example Queries</h3>
+            <p><strong>Get migration trends:</strong></p>
+            <div class="code-snippet">
+                <code>GET /api/analytics/trends?start_year=2015&end_year=2020</code>
+            </div>
+            <p><strong>Compare countries:</strong></p>
+            <div class="code-snippet">
+                <code>GET /api/analytics/comparison?country_codes=DEU&country_codes=FRA</code>
+            </div>
+        </div>
+
+        <div class="integration-card">
+            <h3>Available Countries</h3>
+            <p>37 European countries including:</p>
+            <div class="country-badges">
+                <span class="badge">Austria (AUT)</span>
+                <span class="badge">Belgium (BEL)</span>
+                <span class="badge">Germany (DEU)</span>
+                <span class="badge">France (FRA)</span>
+                <span class="badge">Italy (ITA)</span>
+                <span class="badge">Spain (ESP)</span>
+                <span class="badge">Luxembourg (LUX)</span>
+                <span class="badge">Netherlands (NLD)</span>
+            </div>
+            <p style="margin-top: 1rem;"><small>+ 29 more countries</small></p>
+        </div>
+    </div>
+
+    <div class="integration-examples">
+        <h3>Integration Examples</h3>
+        <div class="example-tabs">
+            <div class="example-content">
+                <h4>JavaScript Example</h4>
+                <pre><code>// Fetch migration trends
+fetch('http://localhost:8080/api/analytics/trends?start_year=2015', {
+  headers: {
+    'X-API-KEY': 'your-api-key'
+  }
+})
+.then(response => response.json())
+.then(data => {
+  console.log(data);
+  // Use data for visualizations
+});</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

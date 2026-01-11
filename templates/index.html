@@ -1,38 +1,91 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Europe Migration Analysis</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <header>
-        <h1>Europe Migration Analysis</h1>
-    </header>
-    <main>
-        <section class="map">
-            <img src="{{ url_for('static', filename='img/europe_map.png') }}" alt="Europe Migration Map">
-            <div class="map-text">
-                <h2>Europe Migration Overview</h2>
-                <p>This visualization and analysis project represents migration trends across Europe, illustrating key regions with significant immigration and 
-                    emigration patterns. Additionally, this project provides web API endpoints, allowing users to access migration data programmatically 
-                    at <a href="{{ request.host_url }}apidocs" target="_blank">API Documentation.</a>. Furthermore, it features an interactive Plotly dashboard 
-                    for dynamic visualization of the datasets, enabling users to explore trends and insights effectively.</p>
-                <h3>Dynamic Visualization Tool</h3>
-                <h5><a href="{{ request.host_url }}analytics/dashboard" target="_blank">Dashboard</a></h5>
-                <h5><a href="{{ request.host_url }}analytics/map" target="_blank">Map Visual</a></h5>
+{% extends "base.html" %}
+
+{% block title %}Home - EU Migration Web API{% endblock %}
+
+{% block content %}
+
+<div class="hero">
+    <div class="container">
+        <h1>European Migration Data API</h1>
+        <p class="subtitle">Comprehensive REST API for European immigration and emigration statistics</p>
+        <div class="cta-buttons">
+            <a href="/apidocs" class="btn btn-primary">Explore API</a>
+            <a href="/integration" class="btn btn-secondary">View Integration</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <section class="features">
+        <div class="feature-card">
+            <h3>Rich Data</h3>
+            <p>Access comprehensive migration statistics from Eurostat covering multiple European countries and years</p>
+        </div>
+        <div class="feature-card">
+            <h3>Secure</h3>
+            <p>API key authentication with encrypted database and rate limiting for secure access</p>
+        </div>
+        <div class="feature-card">
+            <h3>Analytics</h3>
+            <p>Advanced analytics endpoints for trends, comparisons, and statistical analysis</p>
+        </div>
+        <div class="feature-card">
+            <h3>Fast</h3>
+            <p>Optimized queries with caching and pagination for excellent performance</p>
+        </div>
+    </section>
+
+    <section class="endpoints-overview">
+        <h2>Main Endpoints</h2>
+        <div class="endpoint-list">
+            <div class="endpoint-item">
+                <span class="method get">GET</span>
+                <span class="path">/api/migration/data</span>
+                <span class="desc">Get migration data with filters</span>
             </div>
-        </section>
-        
-        <section class="datasets datasets_trans" style="margin-top: 2%;">
-            <h2>Datasets</h2>
-            <p>Immigration Dataset: <a href="https://ec.europa.eu/eurostat/databrowser/product/page/tps00176" target="_blank">Eurostat - Immigration Dataset</a></p>
-            <p>Emigration Dataset: <a href="https://ec.europa.eu/eurostat/databrowser/product/page/tps00177" target="_blank">Eurostat - Emigration Dataset</a></p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2025 Europe Migration Analysis - {{ version }}</p>
-    </footer>
-</body>
-</html>
+            <div class="endpoint-item">
+                <span class="method get">GET</span>
+                <span class="path">/api/migration/countries</span>
+                <span class="desc">List available countries</span>
+            </div>
+            <div class="endpoint-item">
+                <span class="method get">GET</span>
+                <span class="path">/api/analytics/trends</span>
+                <span class="desc">Get migration trends</span>
+            </div>
+            <div class="endpoint-item">
+                <span class="method get">GET</span>
+                <span class="path">/api/analytics/comparison</span>
+                <span class="desc">Compare countries</span>
+            </div>
+            <div class="endpoint-item">
+                <span class="method get">GET</span>
+                <span class="path">/api/analytics/top</span>
+                <span class="desc">Top countries by metric</span>
+            </div>
+            <div class="endpoint-item">
+                <span class="method post">POST</span>
+                <span class="path">/api/auth/login</span>
+                <span class="desc">Get API key</span>
+            </div>
+        </div>
+        <a href="/apidocs" class="btn btn-primary" style="margin-top: 2rem;">View All Endpoints</a>
+    </section>
+
+    <section class="datasets">
+        <h2>Data Sources</h2>
+        <div class="dataset-cards">
+            <div class="dataset-card">
+                <h4>Immigration Dataset</h4>
+                <p>Immigration data by citizenship and country</p>
+                <a href="https://ec.europa.eu/eurostat/databrowser/product/page/tps00176" target="_blank">View on Eurostat →</a>
+            </div>
+            <div class="dataset-card">
+                <h4>Emigration Dataset</h4>
+                <p>Emigration data by citizenship and country</p>
+                <a href="https://ec.europa.eu/eurostat/databrowser/product/page/tps00177" target="_blank">View on Eurostat →</a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
