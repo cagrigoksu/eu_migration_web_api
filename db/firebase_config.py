@@ -2,7 +2,15 @@ import firebase_admin
 from firebase_admin import credentials, auth, firestore
 import os
 
-cred = credentials.Certificate(os.getenv('FIREBASE_CREDENTIALS_PATH', 'firebase-credentials.json'))
+# for render 
+if os.path.exists('/etc/secrets/firebase-credentials.json'):
+    cred = credentials.Certificate('/etc/secrets/firebase-credentials.json')
+else:
+    # my local
+    cred = credentials.Certificate(
+        os.getenv('FIREBASE_CREDENTIALS_PATH', 'firebase-credentials.json')
+    )
+
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
