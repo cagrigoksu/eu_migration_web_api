@@ -400,3 +400,85 @@ section h2 {
     padding: 2rem;
     border-radius: 0.75rem;
 }
+
+.auth-container {
+    max-width: 400px;
+    margin: 4rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.message {
+    margin-top: 1rem;
+}
+
+.message .error {
+    color: #dc3545;
+    background: #f8d7da;
+    padding: 0.75rem;
+    border-radius: 5px;
+}
+
+.message .success {
+    color: #28a745;
+    background: #d4edda;
+    padding: 0.75rem;
+    border-radius: 5px;
+}
+
+.profile-container {
+    max-width: 600px;
+    margin: 4rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.profile-info {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.api-key-section {
+margin: 2rem 0;
+padding: 1.5rem;
+border: 2px solid #e9ecef;
+border-radius: 8px;
+}
+.api-key-section code {
+background: #f8f9fa;
+padding: 0.5rem 1rem;
+border-radius: 5px;
+display: inline-block;
+margin: 0.5rem 0;
+font-family: 'Courier New', monospace;
+}

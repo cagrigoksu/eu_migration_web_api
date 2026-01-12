@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - EU Migration Web API{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-container">
+        <h2>User Profile</h2>
+        <div class="profile-info">
+            <p><strong>Email:</strong> <span id="userEmail"></span></p>
+            <p><strong>User ID:</strong> <span id="userId"></span></p>
+        </div>
+        
+        <div class="api-key-section">
+            <h3>API Key</h3>
+            <div id="apiKeyInfo"></div>
+            <button id="generateKeyBtn" class="btn btn-primary">Generate API Key</button>
+        </div>
+        
+        <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('userId').textContent = user.uid;
+        
+        const idToken = await user.getIdToken();
+        
+        try {
+            const response = await fetch('/api/auth/profile', {
+                headers: {
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch profile');
+            }
+            
+            const data = await response.json();
+            
+            if (data.api_key) {
+                const expiryDate = data.api_key_expiry;
+                let expiryDisplay = 'N/A';
+                
+                if (expiryDate) {
+                    if (expiryDate.seconds) {
+                        expiryDisplay = new Date(expiryDate.seconds * 1000).toLocaleDateString();
+                    } else if (expiryDate._seconds) {
+                        expiryDisplay = new Date(expiryDate._seconds * 1000).toLocaleDateString();
+                    } else {
+                        expiryDisplay = new Date(expiryDate).toLocaleDateString();
+                    }
+                }
+                
+                document.getElementById('apiKeyInfo').innerHTML = `
+                    <p><strong>API Key:</strong> <code>${data.api_key}</code></p>
+                    <p><strong>Expires:</strong> ${expiryDisplay}</p>
+                `;
+                document.getElementById('generateKeyBtn').disabled = true;
+                document.getElementById('generateKeyBtn').textContent = 'Key Already Generated';
+            } else {
+                document.getElementById('apiKeyInfo').innerHTML = '<p>No API key generated yet</p>';
+            }
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+            document.getElementById('apiKeyInfo').innerHTML = '<p class="error">Error loading API key information</p>';
+        }
+    } else {
+        window.location.href = '/login';
+    }
+});
+
+document.getElementById('generateKeyBtn').addEventListener('click', async () => {
+    const user = firebase.auth().currentUser;
+    
+    if (!user) {
+        alert('Please log in first');
+        window.location.href = '/login';
+        return;
+    }
+    
+    const idToken = await user.getIdToken();
+    
+    try {
+        const response = await fetch('/api/auth/generate-key', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert(data.error || 'Error generating API key');
+        }
+    } catch (error) {
+        console.error('Error generating API key:', error);
+        alert('Error generating API key');
+    }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    firebase.auth().signOut().then(() => {
+        localStorage.removeItem('firebase_token');
+        window.location.href = '/login';
+    }).catch((error) => {
+        console.error('Error signing out:', error);
+        alert('Error signing out');
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

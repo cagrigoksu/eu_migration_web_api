@@ -26,12 +26,7 @@ wheels/
 # Environment
 .env
 .env.local
-
-# Database
-*.db
-*.db-journal
-db/*.db
-db/*.db-journal
+firebase-credentials.json
 
 # IDE
 .vscode/

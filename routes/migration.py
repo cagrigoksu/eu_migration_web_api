@@ -1,7 +1,8 @@
 from flask import Blueprint, request
 from flasgger import swag_from
 from services.data_service import data_service
-from utils.helpers import require_api_key, paginate_data, format_response
+from middleware.auth_middleware import require_api_key
+from utils.helpers import paginate_data, format_response
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -29,9 +30,7 @@ migration_bp = Blueprint('migration', __name__, url_prefix='/api/migration')
 })
 @require_api_key
 def get_migration_data():
-    #! get migration data with filters
     try:
-        # query parameters
         country_codes = request.args.getlist('country_codes')
         start_year = request.args.get('start_year', type=int)
         end_year = request.args.get('end_year', type=int)
@@ -39,7 +38,6 @@ def get_migration_data():
         page = request.args.get('page', 1, type=int)
         per_page = min(request.args.get('per_page', 100, type=int), 1000)
         
-        # filter data
         filtered_df = data_service.filter_data(
             countries=country_codes if country_codes else None,
             start_year=start_year,
@@ -53,7 +51,6 @@ def get_migration_data():
                 message='No data found for the given filters'
             )
         
-        # paginate results
         result = paginate_data(filtered_df, page, per_page)
         
         return format_response(data=result)
@@ -81,7 +78,6 @@ def get_migration_data():
 })
 @require_api_key
 def get_countries():
-    #! Get available countries
     try:
         countries = data_service.get_available_countries()
         return format_response(data={'countries': countries, 'count': len(countries)})
@@ -108,7 +104,6 @@ def get_countries():
 })
 @require_api_key
 def get_years():
-    #! Get available years
     try:
         years = data_service.get_available_years()
         return format_response(data={'years': years, 'count': len(years)})
@@ -131,7 +126,6 @@ def get_years():
 })
 @require_api_key
 def get_country_summary(country_code):
-    #! Get country summary
     try:
         summary = data_service.get_country_summary(country_code.upper())
         
@@ -158,7 +152,6 @@ def get_country_summary(country_code):
 })
 @require_api_key
 def get_year_summary(year):
-    #! Get year summary
     try:
         summary = data_service.get_year_summary(year)
         
@@ -181,7 +174,6 @@ def get_year_summary(year):
 })
 @require_api_key
 def get_statistics():
-    #! Get overall statistics
     try:
         stats = data_service.get_statistics()
         return format_response(data=stats)

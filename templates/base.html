@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}EUMigration Web API{% endblock %}</title>
+    <title>{% block title %}EU Migration Web API{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
+<!-- TODO make navbar anchor, dont scroll-->
 <body>
-    <!-- TODO make this navbar anchored to top-->
     <nav class="navbar">
         <div class="container">
             <div class="nav-brand">
@@ -19,6 +19,8 @@
                 <a href="/integration">Integration</a>
                 <a href="/apidocs">API Docs</a>
                 <a href="/health">Health</a>
+                <a href="/login" id="loginLink">Login</a>
+                <a href="/profile" id="profileLink" style="display:none;">Profile</a>
             </div>
         </div>
     </nav>
@@ -33,6 +35,36 @@
             <p>Data source: <a href="https://ec.europa.eu/eurostat" target="_blank">Eurostat</a></p>
         </div>
     </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script>
+
+    const firebaseConfig = {
+        apiKey: "{{ firebase_config.apiKey }}",
+        authDomain: "{{ firebase_config.authDomain }}",
+        projectId: "{{ firebase_config.projectId }}",
+        storageBucket: "{{ firebase_config.storageBucket }}",
+        messagingSenderId: "{{ firebase_config.messagingSenderId }}",
+        appId: "{{ firebase_config.appId }}"
+    };
+
+    try {
+        firebase.initializeApp(firebaseConfig);
+    } catch (error) {
+        console.log('Firebase already initialized');
+    }
+
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            document.getElementById('loginLink').style.display = 'none';
+            document.getElementById('profileLink').style.display = 'block';
+        } else {
+            document.getElementById('loginLink').style.display = 'block';
+            document.getElementById('profileLink').style.display = 'none';
+        }
+    });
+    </script>
 
     {% block scripts %}{% endblock %}
 </body>

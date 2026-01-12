@@ -2,11 +2,9 @@
 Flask==3.0.3
 Werkzeug==3.0.6
 
-# WSGI Server
-gunicorn==21.2.0
-
 # Database
-pysqlcipher3==1.2.0
+firebase-admin==6.3.0
+google-cloud-firestore==2.14.0
 
 # API Documentation
 flasgger==0.9.7.1

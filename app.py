@@ -4,13 +4,11 @@ from flask_cors import CORS
 from flask_caching import Cache
 from flasgger import Swagger
 from config import config
-from db.database import init_db
 from middleware.error_handler import register_error_handlers
 from middleware.rate_limiter import setup_rate_limiter
 from utils.logger import setup_logger
 from utils.helpers import get_version
 
-#  blueprints
 from routes.auth import auth_bp
 from routes.migration import migration_bp
 from routes.analytics import analytics_bp
@@ -33,15 +31,12 @@ def create_app(config_name='default'):
     limiter = setup_rate_limiter(app)
     
     register_error_handlers(app)
-    
-    init_db()
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(migration_bp)
     app.register_blueprint(analytics_bp)
     app.register_blueprint(health_bp)
     
-    # Swagger config
     swagger_config = {
         "headers": [],
         "specs": [
@@ -73,7 +68,7 @@ def create_app(config_name='default'):
                 "type": "apiKey",
                 "name": "X-API-KEY",
                 "in": "header",
-                "description": "API Key Authentication. Get your key by logging in at /api/auth/login"
+                "description": "API Key Authentication. Get your key by logging in at /login"
             }
         },
         "security": [{"ApiKeyAuth": []}],
@@ -86,6 +81,19 @@ def create_app(config_name='default'):
     }
     
     Swagger(app, config=swagger_config, template=swagger_template)
+    
+    @app.context_processor
+    def inject_firebase_config():
+        return {
+            'firebase_config': {
+                'apiKey': app.config['FIREBASE_WEB_API_KEY'],
+                'authDomain': app.config['FIREBASE_AUTH_DOMAIN'],
+                'projectId': app.config['FIREBASE_PROJECT_ID'],
+                'storageBucket': app.config['FIREBASE_STORAGE_BUCKET'],
+                'messagingSenderId': app.config['FIREBASE_MESSAGING_SENDER_ID'],
+                'appId': app.config['FIREBASE_APP_ID']
+            }
+        }
     
     @app.route('/')
     def index():

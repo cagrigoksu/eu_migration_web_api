@@ -1,7 +1,8 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request
 from flasgger import swag_from
 from services.analytics_service import analytics_service
-from utils.helpers import require_api_key, format_response
+from middleware.auth_middleware import require_api_key
+from utils.helpers import format_response
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -24,7 +25,6 @@ analytics_bp = Blueprint('analytics', __name__, url_prefix='/api/analytics')
 })
 @require_api_key
 def get_trends():
-    #! get migration trends
     try:
         countries = request.args.getlist('country_codes')
         start_year = request.args.get('start_year', type=int)
@@ -61,7 +61,6 @@ def get_trends():
 })
 @require_api_key
 def get_comparison():
-    #! compare countries
     try:
         countries = request.args.getlist('country_codes')
         
@@ -101,7 +100,6 @@ def get_comparison():
 })
 @require_api_key
 def get_top_countries():
-    #! get top countries
     try:
         metric = request.args.get('metric', 'net')
         limit = min(request.args.get('limit', 10, type=int), 50)
@@ -130,7 +128,6 @@ def get_top_countries():
 })
 @require_api_key
 def get_balance():
-    #! get migration balance
     try:
         countries = request.args.getlist('country_codes')
         start_year = request.args.get('start_year', type=int)
@@ -164,7 +161,6 @@ def get_balance():
 })
 @require_api_key
 def get_growth():
-    #! get growth rates
     try:
         country = request.args.get('country_code')
         
@@ -186,7 +182,6 @@ def get_growth():
 })
 @require_api_key
 def get_correlation():
-    #! get correlation analysis
     try:
         correlation = analytics_service.get_correlation_analysis()
         return format_response(data={'correlation': correlation})
@@ -208,7 +203,6 @@ def get_correlation():
 })
 @require_api_key
 def get_distribution():
-    #! get distribution stats
     try:
         metric = request.args.get('metric', 'net')
         stats = analytics_service.get_distribution_stats(metric)
