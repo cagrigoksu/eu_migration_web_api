@@ -18,6 +18,7 @@
         </div>
         
         <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+        <div id="logoutMessage" class="message"></div>
     </div>
 </div>
 
@@ -108,14 +109,37 @@ document.getElementById('generateKeyBtn').addEventListener('click', async () => 
     }
 });
 
-document.getElementById('logoutBtn').addEventListener('click', () => {
-    firebase.auth().signOut().then(() => {
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    try {
+        const user = firebase.auth().currentUser;
+        
+        if (user) {
+            const idToken = await user.getIdToken();
+            
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${idToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        }
+        
+        await firebase.auth().signOut();
         localStorage.removeItem('firebase_token');
-        window.location.href = '/login';
-    }).catch((error) => {
+        
+        document.getElementById('logoutMessage').innerHTML = 
+            '<p class="success">Logged out successfully</p>';
+        
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 1000);
+        
+    } catch (error) {
         console.error('Error signing out:', error);
-        alert('Error signing out');
-    });
+        document.getElementById('logoutMessage').innerHTML = 
+            '<p class="error">Error signing out: ' + error.message + '</p>';
+    }
 });
 </script>
 {% endblock %}

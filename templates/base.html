@@ -21,6 +21,7 @@
                 <a href="/health">Health</a>
                 <a href="/login" id="loginLink">Login</a>
                 <a href="/profile" id="profileLink" style="display:none;">Profile</a>
+                <a href="#" id="navLogoutLink" style="display:none;">Logout</a>
             </div>
         </div>
     </nav>
@@ -39,7 +40,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script>
-
     const firebaseConfig = {
         apiKey: "{{ firebase_config.apiKey }}",
         authDomain: "{{ firebase_config.authDomain }}",
@@ -59,9 +59,41 @@
         if (user) {
             document.getElementById('loginLink').style.display = 'none';
             document.getElementById('profileLink').style.display = 'block';
+            document.getElementById('navLogoutLink').style.display = 'block';
         } else {
             document.getElementById('loginLink').style.display = 'block';
             document.getElementById('profileLink').style.display = 'none';
+            document.getElementById('navLogoutLink').style.display = 'none';
+        }
+    });
+
+    document.getElementById('navLogoutLink').addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        try {
+            const user = firebase.auth().currentUser;
+            
+            if (user) {
+                const idToken = await user.getIdToken();
+                
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            }
+            
+            await firebase.auth().signOut();
+            
+            localStorage.removeItem('firebase_token');
+            
+            window.location.href = '/';
+            
+        } catch (error) {
+            console.error('Error signing out:', error);
+            alert('Error signing out: ' + error.message);
         }
     });
     </script>

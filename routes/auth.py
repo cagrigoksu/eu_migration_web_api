@@ -53,3 +53,11 @@ def generate_key():
         return jsonify(result), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+@auth_bp.route('/api/auth/logout', methods=['POST'])
+@require_firebase_auth
+def logout():
+    try:
+        return jsonify({'message': 'Logged out successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

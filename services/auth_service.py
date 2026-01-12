@@ -38,26 +38,34 @@ class AuthService:
     @staticmethod
     def generate_api_key(uid):
         try:
-            # check if user has active key
-            user_doc = db.collection('users').document(uid).get()
-            if user_doc.exists:
-                user_data = user_doc.to_dict()
-                if user_data.get('api_key') and user_data.get('api_key_expiry'):
-                    expiry = user_data['api_key_expiry']
-                    if expiry > datetime.now():
-                        raise Exception("User already has an active API key")
+            user_doc_ref = db.collection('users').document(uid)
+            user_doc = user_doc_ref.get()
             
-            # generate key
+            if not user_doc.exists:
+                user = auth.get_user(uid)
+                user_doc_ref.set({
+                    'email': user.email,
+                    'created_at': firestore.SERVER_TIMESTAMP,
+                    'api_key': None,
+                    'api_key_expiry': None
+                })
+                user_doc = user_doc_ref.get()
+            
+            user_data = user_doc.to_dict()
+            
+            if user_data.get('api_key') and user_data.get('api_key_expiry'):
+                expiry = user_data['api_key_expiry']
+                if expiry > datetime.now():
+                    raise Exception("User already has an active API key")
+            
             api_key = str(uuid.uuid4())
             expiry_date = datetime.now() + timedelta(days=30)
             
-            # update user doc
-            db.collection('users').document(uid).update({
+            user_doc_ref.update({
                 'api_key': api_key,
                 'api_key_expiry': expiry_date
             })
             
-            # create API key document
             db.collection('api_keys').document(api_key).set({
                 'user_id': uid,
                 'created_at': firestore.SERVER_TIMESTAMP,
@@ -78,9 +86,7 @@ class AuthService:
             key_data = key_doc.to_dict()
             expiry = key_data.get('expires_at')
             
-            # check if expired
             if expiry and expiry < datetime.now():
-                # delete expired key
                 db.collection('api_keys').document(api_key).delete()
                 db.collection('users').document(key_data['user_id']).update({
                     'api_key': None,
@@ -95,9 +101,19 @@ class AuthService:
     @staticmethod
     def get_user_profile(uid):
         try:
-            user_doc = db.collection('users').document(uid).get()
-            if user_doc.exists:
-                return user_doc.to_dict()
-            return None
+            user_doc_ref = db.collection('users').document(uid)
+            user_doc = user_doc_ref.get()
+            
+            if not user_doc.exists:
+                user = auth.get_user(uid)
+                user_doc_ref.set({
+                    'email': user.email,
+                    'created_at': firestore.SERVER_TIMESTAMP,
+                    'api_key': None,
+                    'api_key_expiry': None
+                })
+                user_doc = user_doc_ref.get()
+            
+            return user_doc.to_dict()
         except Exception as e:
             return None

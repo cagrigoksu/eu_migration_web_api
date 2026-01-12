@@ -73,7 +73,6 @@ def create_app(config_name='default'):
         },
         "security": [{"ApiKeyAuth": []}],
         "tags": [
-            {"name": "Authentication", "description": "Authentication endpoints"},
             {"name": "Migration Data", "description": "Migration data endpoints"},
             {"name": "Analytics", "description": "Analytics and aggregation endpoints"},
             {"name": "Health", "description": "Health check endpoints"}
